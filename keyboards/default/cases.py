@@ -3,6 +3,7 @@ from vkbottle import Keyboard, KeyboardButtonColor, Text, Callback
 cases_positive = (
     Keyboard(one_time=False, inline=False)
     .add(Text("Бонус &#127873;", payload={"case": "bonus"}), color=KeyboardButtonColor.POSITIVE)
+    .row()
     .add(Text("Стандарт &#128477;"), color=KeyboardButtonColor.SECONDARY)
     .add(Text("Вип &#128273;"), color=KeyboardButtonColor.SECONDARY)
     .row()
@@ -13,6 +14,7 @@ cases_positive = (
 cases_negative = (
     Keyboard(one_time=False, inline=False)
     .add(Text("Бонус &#127873;", payload={"case": "bonus"}), color=KeyboardButtonColor.NEGATIVE)
+    .row()
     .add(Text("Стандарт &#128477;"), color=KeyboardButtonColor.SECONDARY)
     .add(Text("Вип &#128273;"), color=KeyboardButtonColor.SECONDARY)
     .row()

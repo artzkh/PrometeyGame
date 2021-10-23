@@ -1,3 +1,4 @@
-from .menu import menu_positive, menu_negative
-from .cases import cases_positive, cases_negative
-from .spam import spam
+from .menu import *
+from .cases import *
+from .spam import *
+from .shop import *

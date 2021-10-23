@@ -2,6 +2,7 @@ from vkbottle.bot import Message, Blueprint
 
 from functions import generate_attachment
 from functions.cases import is_bonus
+from functions.generate_attachment import hall_generator
 from json_data import pictures
 from states import States
 
@@ -28,5 +29,6 @@ async def back_to_menu(message: Message):
 
 @bp.on.private_message(state=States.ACTIVE, payload={"main_menu": "room_hall"})
 async def rooms_hall(message: Message):
-    await message.answer("Попробуй полистать вправо-влево", keyboard=keyboards.room_hall,
-                         attachment=pictures[await generate_attachment(peer_id=message.peer_id, room=1)])
+    attachment, msg = await hall_generator(peer_id=message.peer_id, rec=message.state_peer.payload["recommendation"])
+    await message.answer(message=msg, keyboard=keyboards.room_hall,
+                         attachment=attachment)
