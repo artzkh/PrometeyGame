@@ -1,22 +1,3 @@
-default_pers = {
-      "balance": 0,
-      "bonus_time": 0,
-      "bonus_day": 0,
-      "status": "training",
-      "body": 3,
-      "dirt": 0,
-      "face": 2,
-      "clothes": 1,
-      "room_lvl": 1,
-      "furniture": {
-         "room_hall": 0,
-         "room_kitchen": 0,
-         "room_bathroom": 0,
-         "room_bedroom": 0
-      },
-      "spam": 0
-}
-
 rooms_name = {1: "hall",
               2: "kitchen",
               3: "bedroom",
@@ -26,6 +7,39 @@ rooms_russian_name = {1: "гостинная",
                       2: "кухня",
                       3: "спальня",
                       4: "ванная"}
+
+needs_button = {'draw': {'name': 'Рисовать', 'time_snackbar': 'Идеи для новых рисунков придут через ',
+                         'full_snackbar': 'У тебя полный показатель счастья &#127881;',
+                         'emoji': '&#128396;', 'indicator': 'happiness', 'time': 86400, 'recovery': 20},
+                'read': {'name': 'Читать', 'time_snackbar': 'Желание почитать появится через ',
+                         'full_snackbar': 'У тебя полный показатель счастья &#127881;',
+                         'emoji': '&#128214;', 'indicator': 'happiness', 'time': 900, 'recovery': 5},
+                'sleep': {'name': 'Поспать', 'time_snackbar': 'Желание поспать придет через ',
+                          'full_snackbar': 'У тебя полный показатель энергии &#9889;',
+                          'emoji': '&#128164;', 'indicator': 'energy', 'time': 86400, 'recovery': 20},
+                'rest': {'name': 'Отдохнуть', 'time_snackbar': 'Снова отдохнуть можно через ',
+                         'full_snackbar': 'У тебя полный показатель энергии &#9889;',
+                         'emoji': '&#128133;', 'indicator': 'energy', 'time': 900, 'recovery': 5},
+                'ration': {'name': 'Сухпаек', 'time_snackbar': 'Выдача сухпайков через ',
+                           'full_snackbar': 'У тебя полные показатели сытости &#127831;',
+                           'emoji': '&#129387;', 'indicator': 'satiety', 'time': 86400, 'recovery': 20},
+                'shower': {'name': 'Помыться', 'time_snackbar': 'Вода в душе появится через ',
+                           'full_snackbar': 'У тебя полные показатели гигиены &#129532;',
+                           'emoji': '&#128705;', 'indicator': 'hygiene', 'time': 86400, 'recovery': 20},
+                'toilet': {'name': 'Туалет', 'time_snackbar': 'Желание сходить в туалет появится через ',
+                           'full_snackbar': 'У тебя полные показатели гигиены &#129532;',
+                           'emoji': '&#128701;', 'indicator': 'hygiene', 'time': 900, 'recovery': 5}}
+
+reserve_button = {
+    'snack': {
+        'name': 'Перекус',
+        'emoji': '&#127823;'
+    },
+    'eat': {
+        'name': 'Покушать',
+        'emoji': '&#127828;'
+    }
+}
 
 max_room_update = {
     1: {1: 6,
@@ -110,6 +124,18 @@ products = {"apple": {
     'emoji': '&#127856;'
 },
             }
+
+services = {"apple": {
+    'fire': 5,
+    'reserve': 1,
+    'emoji': '&#127823;'
+},
+            "banana": {
+    'fire': 9,
+    'reserve': 3,
+    'emoji': '&#127820;'
+}
+          }
 
 rooms_update = {
     1: {

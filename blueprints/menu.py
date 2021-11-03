@@ -29,6 +29,6 @@ async def back_to_menu(message: Message):
 
 @bp.on.private_message(state=States.ACTIVE, payload={"main_menu": "room_hall"})
 async def rooms_hall(message: Message):
-    attachment, msg = await hall_generator(peer_id=message.peer_id, rec=message.state_peer.payload["recommendation"])
-    await message.answer(message=msg, keyboard=keyboards.room_hall,
-                         attachment=attachment)
+    attachment, msg, keyboard = await hall_generator(peer_id=message.peer_id,
+                                                     rec=message.state_peer.payload["recommendation"])
+    await message.answer(message=msg, keyboard=keyboard, attachment=attachment)

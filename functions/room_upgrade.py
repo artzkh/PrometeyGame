@@ -16,9 +16,7 @@ async def room_upgrade_message(peer_id, room):
 
 
 async def buy_room_upgrade(peer_id, room):
-
     room_lvl, furniture, balance = await db.get_user_room_lvl_furniture_balance(peer_id, rooms_name[room])
-
     if furniture == len(rooms_update[room_lvl][room]):
         return False
     else:

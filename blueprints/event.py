@@ -1,5 +1,5 @@
 from asyncio import sleep
-from time import time
+from time import time, strftime, gmtime
 import json
 from random import choice
 
@@ -11,9 +11,9 @@ from vkbottle_types.events import GroupEventType
 import config
 from config import GROUP_ID, db
 from functions import room_upgrade_message, buy_room_upgrade, kitchen_generator, \
-    bedroom_generator, bathroom_generator, hall_generator
+    bedroom_generator, bathroom_generator, hall_generator, room_caller
 from settings import event_block_time
-from settings.cannot_change import products, rec_limit
+from settings.cannot_change import products, rec_limit, needs_button
 from states import States
 
 import errors
@@ -33,30 +33,30 @@ async def handle_message_event(event: GroupTypes.MessageEvent):
             try:
                 if payload.get("room_menu"):
                     if payload["room_menu"] == "hall":
-                        attachment, message = await hall_generator(peer_id=event.object.peer_id, rec=rec)
+                        attachment, message, keyboard = await hall_generator(peer_id=event.object.peer_id, rec=rec)
                         await bp.api.messages.edit(peer_id=event.object.peer_id, group_id=GROUP_ID,
-                                                   keyboard=keyboards.room_hall,
+                                                   keyboard=keyboard,
                                                    conversation_message_id=event.object.conversation_message_id,
                                                    message=message,
                                                    attachment=attachment)
                     elif payload["room_menu"] == "kitchen":
-                        attachment, message = await kitchen_generator(peer_id=event.object.peer_id, rec=rec)
+                        attachment, message, keyboard = await kitchen_generator(peer_id=event.object.peer_id, rec=rec)
                         await bp.api.messages.edit(peer_id=event.object.peer_id, group_id=GROUP_ID,
-                                                   keyboard=choice([keyboards.room_kitchen_1, keyboards.room_kitchen_2]),
+                                                   keyboard=keyboard,
                                                    conversation_message_id=event.object.conversation_message_id,
                                                    message=message,
                                                    attachment=attachment)
                     elif payload["room_menu"] == "bedroom":
-                        attachment, message = await bedroom_generator(peer_id=event.object.peer_id, rec=rec)
+                        attachment, message, keyboard = await bedroom_generator(peer_id=event.object.peer_id, rec=rec)
                         await bp.api.messages.edit(peer_id=event.object.peer_id, group_id=GROUP_ID,
-                                                   keyboard=keyboards.room_bedroom,
+                                                   keyboard=keyboard,
                                                    conversation_message_id=event.object.conversation_message_id,
                                                    message=message,
                                                    attachment=attachment)
                     elif payload["room_menu"] == "bathroom":
-                        attachment, message = await bathroom_generator(peer_id=event.object.peer_id, rec=rec)
+                        attachment, message, keyboard = await bathroom_generator(peer_id=event.object.peer_id, rec=rec)
                         await bp.api.messages.edit(peer_id=event.object.peer_id, group_id=GROUP_ID,
-                                                   keyboard=keyboards.room_bathroom,
+                                                   keyboard=keyboard,
                                                    conversation_message_id=event.object.conversation_message_id,
                                                    message=message,
                                                    attachment=attachment)
@@ -81,258 +81,85 @@ async def handle_message_event(event: GroupTypes.MessageEvent):
                             user_id=event.object.user_id,
                             peer_id=event.object.peer_id,
                             event_data=json.dumps({"type": "show_snackbar",
-                                                   "text": f"+{products[payload['products']]['reserve']}&#11088; "
+                                                   "text": f"+{products[payload['products']]['reserve']}&#129377; "
                                                            f"к запасу еды. Баланс: {balance}&#128293;"}))
+                elif payload.get('services'):
+                    pass
                 elif payload.get('reserve'):
-                    if payload.get('reserve') == 'read':
-                        reserve, ind, max_ind = await config.db.get_user_reserve_happiness(event.object.peer_id)
-                        if ind >= max_ind:
-                            await bp.api.messages.send_message_event_answer(
-                                event_id=event.object.event_id,
-                                user_id=event.object.user_id,
-                                peer_id=event.object.peer_id,
-                                event_data=json.dumps({"type": "show_snackbar",
-                                                       "text": f"У тебя полные показатели счастья &#127881;"}))
-                        elif reserve < 1:
-                            await bp.api.messages.send_message_event_answer(
-                                event_id=event.object.event_id,
-                                user_id=event.object.user_id,
-                                peer_id=event.object.peer_id,
-                                event_data=json.dumps({"type": "show_snackbar",
-                                                      "text": "Пополни запасы в книжном магазине &#128213;"})
-                            )
-                        else:
-                            await config.db.buy_happiness(event.object.peer_id, ind+1, reserve-1)
-                            attachment, message = await hall_generator(peer_id=event.object.peer_id, rec=rec)
-                            await bp.api.messages.edit(peer_id=event.object.peer_id, group_id=GROUP_ID,
-                                                       keyboard=keyboards.room_hall,
-                                                       conversation_message_id=event.object.conversation_message_id,
-                                                       message=message,
-                                                       attachment=attachment)
-                    elif payload.get('reserve') == 'draw':
-                        reserve, ind, max_ind = await config.db.get_user_reserve_happiness(event.object.peer_id)
-                        if ind >= max_ind:
-                            await bp.api.messages.send_message_event_answer(
-                                event_id=event.object.event_id,
-                                user_id=event.object.user_id,
-                                peer_id=event.object.peer_id,
-                                event_data=json.dumps({"type": "show_snackbar",
-                                                       "text": f"У тебя полные показатели счастья &#127881;"}))
-                        elif reserve < 1:
-                            await bp.api.messages.send_message_event_answer(
-                                event_id=event.object.event_id,
-                                user_id=event.object.user_id,
-                                peer_id=event.object.peer_id,
-                                event_data=json.dumps({"type": "show_snackbar",
-                                                      "text": "Пополни запасы в книжном магазине &#128213;"})
-                            )
-                        elif reserve < 10:
-                            await bp.api.messages.send_message_event_answer(
-                                event_id=event.object.event_id,
-                                user_id=event.object.user_id,
-                                peer_id=event.object.peer_id,
-                                event_data=json.dumps({"type": "show_snackbar",
-                                                      "text": f"Для рисования не хватает {10-reserve} &#11088;"})
-                            )
-                        else:
-                            await config.db.buy_happiness(event.object.peer_id, ind + 10, reserve - 10)
-                            attachment, message = await hall_generator(peer_id=event.object.peer_id, rec=rec)
-                            await bp.api.messages.edit(peer_id=event.object.peer_id, group_id=GROUP_ID,
-                                                       keyboard=keyboards.room_hall,
-                                                       conversation_message_id=event.object.conversation_message_id,
-                                                       message=message,
-                                                       attachment=attachment)
-                    elif payload.get('reserve') == 'rest':
-                        reserve, ind, max_ind = await config.db.get_user_reserve_energy(event.object.peer_id)
-                        if ind >= max_ind:
-                            await bp.api.messages.send_message_event_answer(
-                                event_id=event.object.event_id,
-                                user_id=event.object.user_id,
-                                peer_id=event.object.peer_id,
-                                event_data=json.dumps({"type": "show_snackbar",
-                                                       "text": f"У тебя полные показатели энергии &#9889;"}))
-                        elif reserve < 1:
-                            await bp.api.messages.send_message_event_answer(
-                                event_id=event.object.event_id,
-                                user_id=event.object.user_id,
-                                peer_id=event.object.peer_id,
-                                event_data=json.dumps({"type": "show_snackbar",
-                                                      "text": "Пополни запасы в кофейне &#9749;"})
-                            )
-                        else:
-                            await config.db.buy_energy(event.object.peer_id, ind + 1, reserve - 1)
-                            attachment, message = await bedroom_generator(peer_id=event.object.peer_id, rec=rec)
-                            await bp.api.messages.edit(peer_id=event.object.peer_id, group_id=GROUP_ID,
-                                                       keyboard=keyboards.room_bedroom,
-                                                       conversation_message_id=event.object.conversation_message_id,
-                                                       message=message,
-                                                       attachment=attachment)
-                    elif payload.get('reserve') == 'sleep':
-                        reserve, ind, max_ind = await config.db.get_user_reserve_energy(event.object.peer_id)
-                        if ind >= max_ind:
-                            await bp.api.messages.send_message_event_answer(
-                                event_id=event.object.event_id,
-                                user_id=event.object.user_id,
-                                peer_id=event.object.peer_id,
-                                event_data=json.dumps({"type": "show_snackbar",
-                                                       "text": f"У тебя полные показатели энергии &#9889;"}))
-                        elif reserve < 1:
-                            await bp.api.messages.send_message_event_answer(
-                                event_id=event.object.event_id,
-                                user_id=event.object.user_id,
-                                peer_id=event.object.peer_id,
-                                event_data=json.dumps({"type": "show_snackbar",
-                                                      "text": "Пополни запасы в кофейне &#9749;"})
-                            )
-                        elif reserve < 10:
-                            await bp.api.messages.send_message_event_answer(
-                                event_id=event.object.event_id,
-                                user_id=event.object.user_id,
-                                peer_id=event.object.peer_id,
-                                event_data=json.dumps({"type": "show_snackbar",
-                                                       "text": f"Для полноценного сна не хватает "
-                                                               f"{10 - reserve} &#11088;"})
-                            )
-                        else:
-                            await config.db.buy_energy(event.object.peer_id, ind + 10, reserve - 10)
-                            attachment, message = await bedroom_generator(peer_id=event.object.peer_id, rec=rec)
-                            await bp.api.messages.edit(peer_id=event.object.peer_id, group_id=GROUP_ID,
-                                                       keyboard=keyboards.room_bedroom,
-                                                       conversation_message_id=event.object.conversation_message_id,
-                                                       message=message,
-                                                       attachment=attachment)
-                    elif payload.get('reserve') == 'snack':
-                        reserve, ind, max_ind = await config.db.get_user_reserve_satiety(event.object.peer_id)
-                        if ind >= max_ind:
-                            await bp.api.messages.send_message_event_answer(
-                                event_id=event.object.event_id,
-                                user_id=event.object.user_id,
-                                peer_id=event.object.peer_id,
-                                event_data=json.dumps({"type": "show_snackbar",
-                                                       "text": f"У тебя полные показатели сытости &#127831;"}))
-                        elif reserve < 1:
-                            await bp.api.messages.send_message_event_answer(
-                                event_id=event.object.event_id,
-                                user_id=event.object.user_id,
-                                peer_id=event.object.peer_id,
-                                event_data=json.dumps({"type": "show_snackbar",
-                                                      "text": "Пополни запасы в продуктовом магазине &#129472;"})
-                            )
-                        else:
-                            await config.db.buy_satiety(event.object.peer_id, ind + 1, reserve - 1)
-                            attachment, message = await kitchen_generator(peer_id=event.object.peer_id, rec=rec)
-                            await bp.api.messages.edit(peer_id=event.object.peer_id, group_id=GROUP_ID,
-                                                       keyboard=keyboards.room_kitchen_1,
-                                                       conversation_message_id=event.object.conversation_message_id,
-                                                       message=message,
-                                                       attachment=attachment)
-                    elif payload.get('reserve') == 'eat':
-                        reserve, ind, max_ind = await config.db.get_user_reserve_satiety(event.object.peer_id)
-                        if ind >= max_ind:
-                            await bp.api.messages.send_message_event_answer(
-                                event_id=event.object.event_id,
-                                user_id=event.object.user_id,
-                                peer_id=event.object.peer_id,
-                                event_data=json.dumps({"type": "show_snackbar",
-                                                       "text": f"У тебя полные показатели сытости &#127831;"}))
-                        elif reserve < 1:
-                            await bp.api.messages.send_message_event_answer(
-                                event_id=event.object.event_id,
-                                user_id=event.object.user_id,
-                                peer_id=event.object.peer_id,
-                                event_data=json.dumps({"type": "show_snackbar",
-                                                      "text": "Пополни запасы в продуктовом магазине &#129472;"})
-                            )
-                        elif reserve < 10:
-                            await bp.api.messages.send_message_event_answer(
-                                event_id=event.object.event_id,
-                                user_id=event.object.user_id,
-                                peer_id=event.object.peer_id,
-                                event_data=json.dumps({"type": "show_snackbar",
-                                                       "text": f"До большой порции еды не хватает "
-                                                               f"{10 - reserve} &#11088;"})
-                            )
-                        else:
-                            await config.db.buy_satiety(event.object.peer_id, ind + 10, reserve - 10)
-                            attachment, message = await kitchen_generator(peer_id=event.object.peer_id, rec=rec)
-                            await bp.api.messages.edit(peer_id=event.object.peer_id, group_id=GROUP_ID,
-                                                       keyboard=keyboards.room_kitchen_2,
-                                                       conversation_message_id=event.object.conversation_message_id,
-                                                       message=message,
-                                                       attachment=attachment)
-                    elif payload.get('reserve') == 'toilet':
-                        reserve, ind, max_ind = await config.db.get_user_reserve_hygiene(event.object.peer_id)
-                        if ind >= max_ind:
-                            await bp.api.messages.send_message_event_answer(
-                                event_id=event.object.event_id,
-                                user_id=event.object.user_id,
-                                peer_id=event.object.peer_id,
-                                event_data=json.dumps({"type": "show_snackbar",
-                                                       "text": f"У тебя полные показатели гигиены &#129532;"}))
-                        elif reserve < 1:
-                            await bp.api.messages.send_message_event_answer(
-                                event_id=event.object.event_id,
-                                user_id=event.object.user_id,
-                                peer_id=event.object.peer_id,
-                                event_data=json.dumps({"type": "show_snackbar",
-                                                      "text": "Пополни запасы в хозяйственном магазине &#129532;"})
-                            )
-                        else:
-                            await config.db.buy_hygiene(event.object.peer_id, ind + 1, reserve - 1)
-                            attachment, message = await bathroom_generator(peer_id=event.object.peer_id, rec=rec)
-                            await bp.api.messages.edit(peer_id=event.object.peer_id, group_id=GROUP_ID,
-                                                       keyboard=keyboards.room_bathroom,
-                                                       conversation_message_id=event.object.conversation_message_id,
-                                                       message=message,
-                                                       attachment=attachment)
-                    elif payload.get('reserve') == 'shower':
-                        reserve, ind, max_ind = await config.db.get_user_reserve_hygiene(event.object.peer_id)
-                        if ind >= max_ind:
-                            await bp.api.messages.send_message_event_answer(
-                                event_id=event.object.event_id,
-                                user_id=event.object.user_id,
-                                peer_id=event.object.peer_id,
-                                event_data=json.dumps({"type": "show_snackbar",
-                                                       "text": f"У тебя полные показатели гигиены &#129532;"}))
-                        elif reserve < 1:
-                            await bp.api.messages.send_message_event_answer(
-                                event_id=event.object.event_id,
-                                user_id=event.object.user_id,
-                                peer_id=event.object.peer_id,
-                                event_data=json.dumps({"type": "show_snackbar",
-                                                      "text": "Пополни запасы в хозяйственном магазине &#129532;"})
-                            )
-                        elif reserve < 10:
-                            await bp.api.messages.send_message_event_answer(
-                                event_id=event.object.event_id,
-                                user_id=event.object.user_id,
-                                peer_id=event.object.peer_id,
-                                event_data=json.dumps({"type": "show_snackbar",
-                                                       "text": f"Для принятия душа не хватает "
-                                                               f"{10 - reserve} &#11088;"})
-                            )
+                    reserve, ind, max_ind, ration = await config.db.get_user_reserve_satiety(event.object.peer_id)
+                    if ind > max_ind - 1:
+                        await bp.api.messages.send_message_event_answer(
+                            event_id=event.object.event_id,
+                            user_id=event.object.user_id,
+                            peer_id=event.object.peer_id,
+                            event_data=json.dumps({"type": "show_snackbar",
+                                                   "text": f"У тебя полные показатели сытости &#127831;"}))
+                    elif reserve < 1:
+                        await bp.api.messages.send_message_event_answer(
+                            event_id=event.object.event_id,
+                            user_id=event.object.user_id,
+                            peer_id=event.object.peer_id,
+                            event_data=json.dumps({"type": "show_snackbar",
+                                                   "text": "Пополни запасы в продуктовом магазине &#129472;"})
+                        )
+                    else:
+                        if (ind > max_ind - 10) or (reserve < 10):
+                            ind, reserve = ind+1, reserve-1
                         else:
                             ind, reserve = ind + 10, reserve - 10
-                            if rec_limit['hygiene'] + 10 > ind > rec_limit['hygiene'] - 1:
-                                rec.remove('hygiene')
-                                await bp.state_dispenser.set(event.object.peer_id, state=States.ACTIVE,
-                                                             last_activity=peer_state.payload['last_activity'],
-                                                             recommendation=rec)
-                            await config.db.buy_hygiene(event.object.peer_id, ind, reserve)
-                            attachment, message = await bathroom_generator(peer_id=event.object.peer_id, rec=rec)
-                            await bp.api.messages.edit(peer_id=event.object.peer_id, group_id=GROUP_ID,
-                                                       keyboard=keyboards.room_bathroom,
-                                                       conversation_message_id=event.object.conversation_message_id,
-                                                       message=message,
-                                                       attachment=attachment)
+                        await config.db.buy_satiety(event.object.peer_id, ind, reserve)
+                        attachment, message, keyboard = await kitchen_generator(peer_id=event.object.peer_id, rec=rec)
+                        await bp.api.messages.edit(peer_id=event.object.peer_id, group_id=GROUP_ID,
+                                                   keyboard=keyboard,
+                                                   conversation_message_id=event.object.conversation_message_id,
+                                                   message=message,
+                                                   attachment=attachment)
+
+                elif payload.get('need_button'):
+                    time_ind, ind, max_ind = await db.get_user_time_button(event.object.peer_id,
+                                                                           payload.get('need_button'))
+                    if ind > max_ind - 1:
+                        await bp.api.messages.send_message_event_answer(
+                            event_id=event.object.event_id,
+                            user_id=event.object.user_id,
+                            peer_id=event.object.peer_id,
+                            event_data=json.dumps({"type": "show_snackbar",
+                                                   "text": needs_button[payload.get('need_button')]['full_snackbar']}))
+                    elif time() >= (time_ind + needs_button[payload.get('need_button')]['time']):
+                        recovery = needs_button[payload.get('need_button')]['recovery']
+                        if (ind + recovery) >= max_ind:
+                            ind = max_ind
+                        else:
+                            ind += recovery
+                        await config.db.update_user_time_button(event.object.peer_id, payload.get('need_button'), ind)
+                        attachment, message, keyboard = await room_caller(event.object.peer_id, rec,
+                                                                          payload.get('need_button'))
+                        await bp.api.messages.edit(peer_id=event.object.peer_id, group_id=GROUP_ID,
+                                                   keyboard=keyboard,
+                                                   conversation_message_id=event.object.conversation_message_id,
+                                                   message=message,
+                                                   attachment=attachment)
+                    else:
+                        text = needs_button[payload.get('need_button')]['time_snackbar']
+                        button_time = needs_button[payload.get('need_button')]['time']
+                        if (time_ind + button_time) - time() >= 3600:
+                            text += f"{strftime('%H:%M:%S', gmtime((time_ind + button_time) - int(time())))} &#9203;"
+                        else:
+                            text += f"{strftime('%M:%S', gmtime((time_ind + button_time) - int(time())))} &#9203;"
+                        await bp.api.messages.send_message_event_answer(
+                            event_id=event.object.event_id,
+                            user_id=event.object.user_id,
+                            peer_id=event.object.peer_id,
+                            event_data=json.dumps({"type": "show_snackbar",
+                                                   "text": text}))
                 elif payload.get("room_upgrade"):
                     if payload["room_upgrade"] == "kitchen":
                         room = 2
                         keyboard = keyboards.upgrade_kitchen
                     elif payload["room_upgrade"] == "bedroom":
                         room = 3
-                        keyboard = keyboards.upgrade_bathroom
-                    elif payload["room_upgrade"] == "bedroom":
+                        keyboard = keyboards.upgrade_bedroom
+                    elif payload["room_upgrade"] == "bathroom":
                         room = 4
                         keyboard = keyboards.upgrade_bathroom
                     else:
@@ -394,9 +221,9 @@ async def handle_message_event(event: GroupTypes.MessageEvent):
                                                  conversation_message_ids=[event.object.conversation_message_id],
                                                  delete_for_all=True)
             except VKAPIError(909):
-                attachment, message = await hall_generator(peer_id=event.object.peer_id, rec=rec)
+                attachment, message, keyboard = await hall_generator(peer_id=event.object.peer_id, rec=rec)
                 await bp.api.messages.send(peer_id=event.object.peer_id, group_id=GROUP_ID,
-                                           keyboard=keyboards.room_hall,
+                                           keyboard=keyboard,
                                            random_id=0,
                                            message=message,
                                            attachment=attachment)
