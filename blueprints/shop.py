@@ -12,12 +12,27 @@ bp = Blueprint("shop")
 
 @bp.on.private_message(state=States.ACTIVE, payload={"main_menu": "shop_menu"})
 async def shop_menu(message: Message):
-    await message.answer("Выбери подходящую категорию", keyboard=keyboards.shop_menu)
+    await message.answer("Куда отправимся?", keyboard=keyboards.shop_menu,
+                         attachment="photo318378590_457298968")
 
 
 @bp.on.private_message(state=States.ACTIVE, payload={"shop": "indicators"})
 async def indicators(message: Message):
-    await message.answer("Куда пойдем?", keyboard=keyboards.shop_indicators)
+    if 'satiety' in message.state_peer.payload['recommendation']:
+        await message.answer("Продуктовая лавка", keyboard=keyboards.products_house,
+                             attachment='photo318378590_457298973')
+    elif 'energy' in message.state_peer.payload['recommendation']:
+        await message.answer("Кофейня", keyboard=keyboards.coffee_house,
+                             attachment='photo318378590_457298978')
+    elif 'hygiene' in message.state_peer.payload['recommendation']:
+        await message.answer("Сауна", keyboard=keyboards.sauna_house,
+                             attachment='photo318378590_457298980')
+    elif 'happiness' in message.state_peer.payload['recommendation']:
+        await message.answer("Геймерская", keyboard=keyboards.game_house,
+                             attachment='photo318378590_457298981')
+    else:
+        await message.answer("Продуктовая лавка", keyboard=keyboards.products_house,
+                             attachment='photo318378590_457298973')
 
 
 @bp.on.private_message(state=States.ACTIVE, payload={"shop": "back_to_indicators"})

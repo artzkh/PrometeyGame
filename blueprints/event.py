@@ -11,9 +11,9 @@ from vkbottle_types.events import GroupEventType
 import config
 from config import GROUP_ID, db
 from functions import room_upgrade_message, buy_room_upgrade, kitchen_generator, \
-    bedroom_generator, bathroom_generator, hall_generator, room_caller
+    bedroom_generator, bathroom_generator, hall_generator, room_caller, kitchen_buy_satiety
 from settings import event_block_time
-from settings.cannot_change import products, rec_limit, needs_button
+from settings.cannot_change import products, needs_button
 from states import States
 
 import errors
@@ -83,8 +83,37 @@ async def handle_message_event(event: GroupTypes.MessageEvent):
                             event_data=json.dumps({"type": "show_snackbar",
                                                    "text": f"+{products[payload['products']]['reserve']}&#129377; "
                                                            f"к запасу еды. Баланс: {balance}&#128293;"}))
-                elif payload.get('services'):
-                    pass
+                elif payload.get('shop_house'):
+                    if payload["shop_house"] == "products":
+                        await bp.api.messages.edit(peer_id=event.object.peer_id, group_id=GROUP_ID,
+                                                   keyboard=keyboards.products_house,
+                                                   conversation_message_id=event.object.conversation_message_id,
+                                                   message='Продуктовая лавка',
+                                                   attachment='photo318378590_457298973')
+                    elif payload["shop_house"] == "coffee":
+                        await bp.api.messages.edit(peer_id=event.object.peer_id, group_id=GROUP_ID,
+                                                   keyboard=keyboards.coffee_house,
+                                                   conversation_message_id=event.object.conversation_message_id,
+                                                   message='Кофейня',
+                                                   attachment='photo318378590_457298978')
+                    elif payload["shop_house"] == "sauna":
+                        await bp.api.messages.edit(peer_id=event.object.peer_id, group_id=GROUP_ID,
+                                                   keyboard=keyboards.sauna_house,
+                                                   conversation_message_id=event.object.conversation_message_id,
+                                                   message='Сауна',
+                                                   attachment='photo318378590_457298980')
+                    elif payload["shop_house"] == "game":
+                        await bp.api.messages.edit(peer_id=event.object.peer_id, group_id=GROUP_ID,
+                                                   keyboard=keyboards.game_house,
+                                                   conversation_message_id=event.object.conversation_message_id,
+                                                   message='Геймерская',
+                                                   attachment='photo318378590_457298981')
+                    elif payload["shop_house"] == "hookah":
+                        await bp.api.messages.edit(peer_id=event.object.peer_id, group_id=GROUP_ID,
+                                                   keyboard=keyboards.hookah_house,
+                                                   conversation_message_id=event.object.conversation_message_id,
+                                                   message='Кальянная',
+                                                   attachment='photo318378590_457298982')
                 elif payload.get('reserve'):
                     reserve, ind, max_ind, ration = await config.db.get_user_reserve_satiety(event.object.peer_id)
                     if ind > max_ind - 1:
@@ -100,15 +129,19 @@ async def handle_message_event(event: GroupTypes.MessageEvent):
                             user_id=event.object.user_id,
                             peer_id=event.object.peer_id,
                             event_data=json.dumps({"type": "show_snackbar",
-                                                   "text": "Пополни запасы в продуктовом магазине &#129472;"})
+                                                   "text": "Пополни запасы в городской лавке"})
                         )
                     else:
                         if (ind > max_ind - 10) or (reserve < 10):
-                            ind, reserve = ind+1, reserve-1
+                            new_ind, reserve = ind+1, reserve-1
                         else:
-                            ind, reserve = ind + 10, reserve - 10
-                        await config.db.buy_satiety(event.object.peer_id, ind, reserve)
-                        attachment, message, keyboard = await kitchen_generator(peer_id=event.object.peer_id, rec=rec)
+                            new_ind, reserve = ind + 10, reserve - 10
+                        attachment, message, keyboard, new_rec = await kitchen_buy_satiety(event.object.peer_id, rec,
+                                                                                           ind, new_ind, reserve)
+                        if rec != new_rec:
+                            await bp.state_dispenser.set(event.object.peer_id, States.ACTIVE,
+                                                         last_activity=peer_state.payload["last_activity"],
+                                                         recommendation=new_rec)
                         await bp.api.messages.edit(peer_id=event.object.peer_id, group_id=GROUP_ID,
                                                    keyboard=keyboard,
                                                    conversation_message_id=event.object.conversation_message_id,
@@ -128,12 +161,16 @@ async def handle_message_event(event: GroupTypes.MessageEvent):
                     elif time() >= (time_ind + needs_button[payload.get('need_button')]['time']):
                         recovery = needs_button[payload.get('need_button')]['recovery']
                         if (ind + recovery) >= max_ind:
-                            ind = max_ind
+                            new_ind = max_ind
                         else:
-                            ind += recovery
-                        await config.db.update_user_time_button(event.object.peer_id, payload.get('need_button'), ind)
-                        attachment, message, keyboard = await room_caller(event.object.peer_id, rec,
-                                                                          payload.get('need_button'))
+                            new_ind = ind + recovery
+                        attachment, message, keyboard, new_rec = await room_caller(event.object.peer_id, rec,
+                                                                                      payload.get('need_button'),
+                                                                                      ind, new_ind)
+                        if rec != new_rec:
+                            await bp.state_dispenser.set(event.object.peer_id, States.ACTIVE,
+                                                         last_activity=peer_state.payload["last_activity"],
+                                                         recommendation=new_rec)
                         await bp.api.messages.edit(peer_id=event.object.peer_id, group_id=GROUP_ID,
                                                    keyboard=keyboard,
                                                    conversation_message_id=event.object.conversation_message_id,

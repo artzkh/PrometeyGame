@@ -1,5 +1,6 @@
 from vkbottle.bot import Message, Blueprint
 
+from config import db
 from functions import generate_attachment
 from functions.cases import is_bonus
 from functions.generate_attachment import hall_generator
@@ -13,10 +14,15 @@ bp = Blueprint("main_menu")
 
 @bp.on.private_message(state=States.ACTIVE, payload={"main_menu": "cases"})
 async def menu_cases(message: Message):
-    if await is_bonus(message.peer_id):
-        await message.answer("Выбери подходящий кейс!", keyboard=keyboards.cases_positive)
+    fire, chung, bonus_time = await db.get_cases_menu(peer_id=message.peer_id)
+    if await is_bonus(message.peer_id, bonus_time):
+        await message.answer(f"Баланс: {fire}&#128293;{chung}&#126980;"
+                             f"\nСкорее забирай бонус! &#127873;", attachment="photo318378590_457298952",
+                             keyboard=keyboards.cases_positive)
     else:
-        await message.answer("Выбери подходящий кейс!", keyboard=keyboards.cases_negative)
+        await message.answer(f"Баланс: {fire}&#128293;{chung}&#126980;"
+                             f"\nВыбери подходящий сундук!", attachment="photo318378590_457298952",
+                             keyboard=keyboards.cases_negative)
 
 
 @bp.on.private_message(state=States.ACTIVE, payload={"main_menu": "back"})

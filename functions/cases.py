@@ -3,8 +3,8 @@ from time import time, gmtime, strftime
 from config import db
 
 
-async def is_bonus(peer_id):
-    if time() - await db.get_user_bonus_time(peer_id) > 86400:
+async def is_bonus(peer_id, bonus_time=0):
+    if time() - bonus_time > 86400:
         return True
     else:
         return False

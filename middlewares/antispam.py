@@ -16,7 +16,7 @@ class MessageSpamMiddleware(BaseMiddleware):
             if user_status == "active":
                 await state_dispenser.set(message.peer_id, States.ACTIVE,
                                           last_activity=await db.get_user_last_activity(message.peer_id),
-                                          recommendation={})
+                                          recommendation=[])
                 message.state_peer = await state_dispenser.get(message.peer_id)
             elif user_status == "training":
                 await state_dispenser.set(message.peer_id, States.TRAINING, position=0)

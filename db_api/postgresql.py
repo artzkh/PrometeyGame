@@ -52,7 +52,9 @@ class Database:
         chung_balance BIGINT DEFAULT 0,
         bonus_day SMALLINT DEFAULT 0,
         bonus_time INT DEFAULT 0,
-        attachment VARCHAR(255) DEFAULT '3_1_2',
+        body SMALLINT DEFAULT 3,
+        dirt SMALLINT DEFAULT 1,
+        face SMALLINT DEFAULT 2,
         room_lvl SMALLINT DEFAULT 1,
         hall SMALLINT DEFAULT 0,
         kitchen SMALLINT DEFAULT 0,
@@ -100,25 +102,31 @@ class Database:
         return await self.execute(sql, *parameters, fetchrow=True)
 
     async def get_user_hall(self, peer_id):
-        sql = f"SELECT attachment, current_clothes, room_lvl, hall, " \
+        sql = f"SELECT body, dirt, face, current_clothes, room_lvl, hall, " \
               f"happiness, max_happiness, time_draw, time_read " \
               f"FROM Users WHERE peer_id = $1"
         return await self.execute(sql, peer_id, fetchrow=True)
 
+    async def get_user_hall_change(self, peer_id):
+        sql = f"SELECT body, dirt, face, current_clothes, room_lvl, hall, " \
+              f"happiness, max_happiness, time_draw, time_read, energy " \
+              f"FROM Users WHERE peer_id = $1"
+        return await self.execute(sql, peer_id, fetchrow=True)
+
     async def get_user_kitchen(self, peer_id):
-        sql = f"SELECT attachment, current_clothes, room_lvl, kitchen, " \
+        sql = f"SELECT body, dirt, face, current_clothes, room_lvl, kitchen, " \
               f"satiety, max_satiety, reserve_satiety, time_ration " \
               f"FROM Users WHERE peer_id = $1"
         return await self.execute(sql, peer_id, fetchrow=True)
 
     async def get_user_bedroom(self, peer_id):
-        sql = f"SELECT attachment, current_clothes, room_lvl, bedroom, " \
+        sql = f"SELECT body, dirt, face, current_clothes, room_lvl, bedroom, " \
               f"energy, max_energy, time_sleep, time_rest " \
               f"FROM Users WHERE peer_id = $1"
         return await self.execute(sql, peer_id, fetchrow=True)
 
     async def get_user_bathroom(self, peer_id):
-        sql = f"SELECT attachment, current_clothes, room_lvl, bathroom, " \
+        sql = f"SELECT body, dirt, face, current_clothes, room_lvl, bathroom, " \
               f"hygiene, max_hygiene, time_shower, time_toilet " \
               f"FROM Users WHERE peer_id = $1"
         return await self.execute(sql, peer_id, fetchrow=True)
@@ -129,6 +137,14 @@ class Database:
 
     async def get_user_last_activity(self, peer_id):
         sql = "SELECT last_activity FROM Users WHERE peer_id = $1"
+        return await self.execute(sql, peer_id, fetchval=True)
+
+    async def get_user_energy(self, peer_id):
+        sql = "SELECT energy FROM Users WHERE peer_id = $1"
+        return await self.execute(sql, peer_id, fetchval=True)
+
+    async def get_user_happiness(self, peer_id):
+        sql = "SELECT happiness FROM Users WHERE peer_id = $1"
         return await self.execute(sql, peer_id, fetchval=True)
 
     async def get_user_indicators(self, peer_id):
@@ -155,6 +171,11 @@ class Database:
         sql = f"UPDATE Users SET time_{button} = $1, {needs_button[button]['indicator']} = $2 WHERE peer_id = $3"
         return await self.execute(sql, time(), indicator, peer_id, execute=True)
 
+    async def update_user_time_button_with_attachment(self, peer_id, button, indicator, name, value):
+        sql = f"UPDATE Users SET time_{button} = $1, {needs_button[button]['indicator']} = $2, " \
+              f"{name} = $3 WHERE peer_id = $4"
+        return await self.execute(sql, time(), indicator, value, peer_id, execute=True)
+
     async def get_user_reserve_satiety(self, peer_id):
         sql = "SELECT reserve_satiety, satiety, max_satiety, time_ration FROM Users WHERE peer_id = $1"
         return await self.execute(sql, peer_id, fetchrow=True)
@@ -162,6 +183,10 @@ class Database:
     async def get_user_time_button(self, peer_id, button):
         sql = f"SELECT time_{button}, {needs_button[button]['indicator']}, max_{needs_button[button]['indicator']} " \
               f"FROM Users WHERE peer_id = $1"
+        return await self.execute(sql, peer_id, fetchrow=True)
+
+    async def get_cases_menu(self, peer_id):
+        sql = f"SELECT fire_balance, chung_balance, bonus_time FROM Users WHERE peer_id = $1"
         return await self.execute(sql, peer_id, fetchrow=True)
 
     async def get_user_bonus_time(self, peer_id):
@@ -174,7 +199,7 @@ class Database:
 
     async def start_over(self, peer_id):
         sql = f"UPDATE Users SET last_activity={time()}, status='active', " \
-              "fire_balance=1000, chung_balance=0, bonus_day=0, bonus_time=0, attachment='3_1_2', " \
+              "fire_balance=1000, chung_balance=0, bonus_day=0, bonus_time=0, body=3, dirt=1, face=2, " \
               "room_lvl=1, hall=0, kitchen=0, bathroom=0, bedroom=0, current_clothes=1, clothes='{1}', " \
               "health=100, happiness=100, satiety=100, hygiene=100, energy=100 WHERE peer_id = $1"
         return await self.execute(sql, peer_id, execute=True)
@@ -182,6 +207,10 @@ class Database:
     async def buy_satiety(self, peer_id, ind, reserve):
         sql = "UPDATE Users SET satiety=$1, reserve_satiety=$2 WHERE peer_id=$3"
         return await self.execute(sql, ind, reserve, peer_id, execute=True)
+
+    async def buy_satiety_with_attachment(self, peer_id, ind, reserve, body):
+        sql = "UPDATE Users SET body=$1, satiety=$2, reserve_satiety=$3 WHERE peer_id=$4"
+        return await self.execute(sql, body, ind, reserve, peer_id, execute=True)
 
     async def buy_hygiene(self, peer_id, ind, reserve):
         sql = "UPDATE Users SET hygiene=$1, reserve_hygiene=$2 WHERE peer_id=$3"
@@ -213,15 +242,18 @@ class Database:
 
     # Индикаторы
 
-    async def update_user_indicators_without_health(self, peer_id, attachment, happiness, satiety, hygiene, energy):
-        sql = "UPDATE Users SET attachment=$1, happiness=$2, satiety=$3, hygiene=$4, " \
-              f"energy=$5, last_activity={time()} WHERE peer_id=$6"
-        return await self.execute(sql, attachment, happiness, satiety, hygiene, energy, peer_id, execute=True)
+    async def update_user_indicators_without_health(self, peer_id, body, dirt, face, happiness,
+                                                    satiety, hygiene, energy):
+        sql = "UPDATE Users SET body=$1, dirt=$2, face=$3, happiness=$4, satiety=$5, hygiene=$6, " \
+              f"energy=$7, last_activity={time()} WHERE peer_id=$8"
+        return await self.execute(sql, body, dirt, face, happiness, satiety, hygiene, energy, peer_id, execute=True)
 
-    async def update_user_indicators_with_health(self, peer_id, attachment, happiness, satiety, hygiene, energy, health):
-        sql = "UPDATE Users SET attachment=$1, happiness=$2, satiety=$3, hygiene=$4, " \
-              f"energy=$5, health=$6, last_activity={time()} WHERE peer_id=$7"
-        return await self.execute(sql, attachment, happiness, satiety, hygiene, energy, health, peer_id, execute=True)
+    async def update_user_indicators_with_health(self, peer_id, body, dirt, face, happiness,
+                                                 satiety, hygiene, energy, health):
+        sql = "UPDATE Users SET body=$1, dirt=$2, face=$3, happiness=$4, satiety=$5, hygiene=$6, " \
+              f"energy=$7, health=$8, last_activity={time()} WHERE peer_id=$9"
+        return await self.execute(sql, body, dirt, face, happiness,
+                                  satiety, hygiene, energy, health, peer_id, execute=True)
 
     async def update_status(self, peer_id, status):
         sql = "UPDATE Users SET status=$1, last_activity=$2 WHERE peer_id=$3"

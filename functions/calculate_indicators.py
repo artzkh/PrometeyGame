@@ -47,8 +47,8 @@ async def calculate_indicators(peer_id, last_activity):
             happiness = energy = 0
         else:
             happiness = 0
-            attachment, recommendations = generate_attachment(ceil(happiness), ceil(satiety), ceil(hygiene), ceil(energy))
-            await db.update_user_indicators_without_health(peer_id, attachment, happiness, satiety, hygiene, energy)
+            body, dirt, face, recommendations = generate_attachment(ceil(happiness), ceil(satiety), ceil(hygiene), ceil(energy))
+            await db.update_user_indicators_without_health(peer_id, body, dirt, face, happiness, satiety, hygiene, energy)
             if health <= rec_limit['health']:
                 recommendations.append('health')
             return recommendations
@@ -68,8 +68,8 @@ async def calculate_indicators(peer_id, last_activity):
             satiety = energy = 0
         else:
             satiety = 0
-            attachment, recommendations = generate_attachment(ceil(happiness), ceil(satiety), ceil(hygiene), ceil(energy))
-            await db.update_user_indicators_without_health(peer_id, attachment, happiness, satiety, hygiene, energy)
+            body, dirt, face, recommendations = generate_attachment(ceil(happiness), ceil(satiety), ceil(hygiene), ceil(energy))
+            await db.update_user_indicators_without_health(peer_id, body, dirt, face, happiness, satiety, hygiene, energy)
             if health <= rec_limit['health']:
                 recommendations.append('health')
             return recommendations
@@ -80,8 +80,8 @@ async def calculate_indicators(peer_id, last_activity):
             hygiene = energy = 0
         else:
             hygiene = 0
-            attachment, recommendations = generate_attachment(ceil(happiness), ceil(satiety), ceil(hygiene), ceil(energy))
-            await db.update_user_indicators_without_health(peer_id, attachment, happiness, satiety, hygiene, energy)
+            body, dirt, face, recommendations = generate_attachment(ceil(happiness), ceil(satiety), ceil(hygiene), ceil(energy))
+            await db.update_user_indicators_without_health(peer_id, body, dirt, face, happiness, satiety, hygiene, energy)
             if health <= rec_limit['health']:
                 recommendations.append('health')
             return recommendations
@@ -89,18 +89,18 @@ async def calculate_indicators(peer_id, last_activity):
     else:
         if energy <= 0:
             energy = 0
-        attachment, recommendations = generate_attachment(ceil(happiness), ceil(satiety), ceil(hygiene), ceil(energy))
-        await db.update_user_indicators_without_health(peer_id, attachment, happiness, satiety, hygiene, energy)
+        body, dirt, face, recommendations = generate_attachment(ceil(happiness), ceil(satiety), ceil(hygiene), ceil(energy))
+        await db.update_user_indicators_without_health(peer_id, body, dirt, face, happiness, satiety, hygiene, energy)
         if health <= rec_limit['health']:
             recommendations.append('health')
         return recommendations
 
-    attachment, recommendations = generate_attachment(ceil(happiness), ceil(satiety), ceil(hygiene), ceil(energy))
+    body, dirt, face, recommendations = generate_attachment(ceil(happiness), ceil(satiety), ceil(hygiene), ceil(energy))
     if ceil(health) <= 0:
         return False
     elif health <= 99:
         recommendations.append('health')
-    await db.update_user_indicators_with_health(peer_id, attachment, happiness, satiety, hygiene, energy, health)
+    await db.update_user_indicators_with_health(peer_id, body, dirt, face, happiness, satiety, hygiene, energy, health)
     return recommendations
 
 
@@ -108,35 +108,35 @@ def generate_attachment(happiness, satiety, hygiene, energy):
 
     recommendations = []
 
-    if satiety >= 200:
-        attachment = "5"
-    elif satiety >= 120:
-        attachment = "4"
-    elif satiety >= 70:
-        attachment = "3"
-    elif satiety >= rec_limit['satiety']:
-        attachment = "2"
-    else:
-        recommendations.append('satiety')
-        attachment = "1"
-
     if hygiene >= rec_limit['hygiene']:
-        attachment += "_1"
+        dirt = 1
     else:
         recommendations.append('hygiene')
-        attachment += "_2"
+        dirt = 2
 
-    if happiness >= 100 and energy >= 80:
-        attachment += "_1"
-    elif happiness >= 60 and energy >= 30:
-        attachment += "_2"
-    elif happiness >= rec_limit['happiness']:
-        attachment += "_3"
+    if satiety >= 200:
+        body = 5
+    elif satiety >= 120:
+        body = 4
+    elif satiety >= 70:
+        body = 3
+    elif satiety >= rec_limit['satiety']:
+        body = 2
     else:
-        recommendations.append('happiness')
-        attachment += "_4"
+        recommendations.append('satiety')
+        body = 1
 
     if energy <= rec_limit['energy']:
         recommendations.append('energy')
 
-    return attachment, recommendations
+    if happiness >= 100 and energy >= 80:
+        face = 1
+    elif happiness >= 60 and energy >= 30:
+        face = 2
+    elif happiness >= rec_limit['happiness']:
+        face = 3
+    else:
+        recommendations.append('happiness')
+        face = 4
+
+    return body, dirt, face, recommendations
