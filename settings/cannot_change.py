@@ -27,8 +27,8 @@ needs_button = {'draw': {'name': 'Рисовать', 'time_snackbar': 'Идеи 
                            'full_snackbar': 'У тебя полные показатели гигиены &#129532;',
                            'emoji': '&#128705;', 'indicator': 'hygiene', 'time': 86400, 'recovery': 80},
                 'toilet': {'name': 'Туалет', 'time_snackbar': 'В туалет захочется через ',
-                           'full_snackbar': 'У тебя полные показатели гигиены &#129531;',
-                           'emoji': '&#129531;', 'indicator': 'hygiene', 'time': 900, 'recovery': 10}}
+                           'full_snackbar': 'У тебя полные показатели гигиены &#129532;',
+                           'emoji': '&#128701;', 'indicator': 'hygiene', 'time': 900, 'recovery': 10}}
 
 reserve_button = {
     'snack': {

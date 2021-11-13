@@ -210,7 +210,7 @@ async def bathroom_generator(peer_id, rec):
         await db.get_user_bathroom(peer_id)
     attachment = f"{body}_{dirt}_{face_num}_{clothes}_{room_lvl}_4_{room_furniture}"
     message = f"Ванная [{room_furniture}/{max_room_update[room_lvl][4]}]" \
-              f"\n\nГигиена: {ceil(hygiene)}/{max_hygiene} &#129532;"
+              f"\n\nГигиена: {ceil(hygiene)}/{max_hygiene} &#129531;"
 
     if time() >= (time_shower + needs_button['shower']['time']):
         if time() >= (time_toilet + needs_button['toilet']['time']):

@@ -1,5 +1,8 @@
+from math import ceil
+
 from vkbottle.bot import Message, Blueprint
 
+from config import db
 from functions import generate_attachment
 from functions.cases import is_bonus
 from json_data import pictures
@@ -35,33 +38,47 @@ async def indicators(message: Message):
                              attachment='photo318378590_457298973')
 
 
-@bp.on.private_message(state=States.ACTIVE, payload={"shop": "back_to_indicators"})
+@bp.on.private_message(state=States.ACTIVE, payload={"shop": "back_to_menu"})
 async def back_to_indicators(message: Message):
-    await message.answer("Зайдём куда-нибудь ещё?", keyboard=keyboards.shop_indicators)
+    await message.answer("Зайдём куда-нибудь ещё?", keyboard=keyboards.shop_menu,
+                         attachment="photo318378590_457298968")
 
 
 @bp.on.private_message(state=States.ACTIVE, payload={"shop": "products"})
 async def products(message: Message):
     await message.answer("Нажми на продукт, который хочешь приобрести."
                          "\n&#128293; — цена"
-                         "\n&#11088; — прибавка к запасу", keyboard=keyboards.shop_products_fruits)
+                         "\n&#11088; — прибавка к запасу", keyboard=keyboards.shop_products_fruits,
+                         attachment="photo318378590_457298974")
 
 
 @bp.on.private_message(state=States.ACTIVE, payload={"shop": "products_fruits"})
 async def products_fruits(message: Message):
-    await message.answer("Фруктовый отдел", keyboard=keyboards.shop_products_fruits)
+    balance, reserve, satiety, max_satiety = await db.get_for_products_shop(peer_id=message.peer_id)
+    await message.answer(f"Баланс: {balance}&#128293;{reserve}&#129377;"
+                         f"\nСытость: {ceil(satiety)}/{max_satiety}&#127831;", keyboard=keyboards.shop_products_fruits,
+                         attachment="photo318378590_457298974")
 
 
 @bp.on.private_message(state=States.ACTIVE, payload={"shop": "products_gastronomy"})
 async def products_gastronomy(message: Message):
-    await message.answer("Кондитерский отдел", keyboard=keyboards.shop_products_gastronomy)
+    balance, reserve, satiety, max_satiety = await db.get_for_products_shop(peer_id=message.peer_id)
+    await message.answer(f"Баланс: {balance}&#128293;{reserve}&#129377;"
+                         f"\nСытость: {ceil(satiety)}/{max_satiety}&#127831;", keyboard=keyboards.shop_products_gastronomy,
+                         attachment="photo318378590_457298975")
 
 
 @bp.on.private_message(state=States.ACTIVE, payload={"shop": "products_fastfood"})
 async def products_gastronomy(message: Message):
-    await message.answer("Отдел быстрого питания", keyboard=keyboards.shop_products_fastfood)
+    balance, reserve, satiety, max_satiety = await db.get_for_products_shop(peer_id=message.peer_id)
+    await message.answer(f"Баланс: {balance}&#128293;{reserve}&#129377;"
+                         f"\nСытость: {ceil(satiety)}/{max_satiety}&#127831;", keyboard=keyboards.shop_products_fastfood,
+                         attachment="photo318378590_457298976")
 
 
 @bp.on.private_message(state=States.ACTIVE, payload={"shop": "products_meat"})
 async def products_gastronomy(message: Message):
-    await message.answer("Мясной отдел", keyboard=keyboards.shop_products_meat)
+    balance, reserve, satiety, max_satiety = await db.get_for_products_shop(peer_id=message.peer_id)
+    await message.answer(f"Баланс: {balance}&#128293;{reserve}&#129377;"
+                         f"\nСытость: {ceil(satiety)}/{max_satiety}&#127831;", keyboard=keyboards.shop_products_meat,
+                         attachment="photo318378590_457298977")

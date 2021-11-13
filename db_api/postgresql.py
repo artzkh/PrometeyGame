@@ -101,6 +101,10 @@ class Database:
         sql, parameters = self.format_args(sql, parameters=kwargs)
         return await self.execute(sql, *parameters, fetchrow=True)
 
+    async def get_user_peer_id(self, user_id):
+        sql = f"SELECT peer_id FROM Users WHERE id = $1"
+        return await self.execute(sql, user_id, fetchval=True)
+
     async def get_user_hall(self, peer_id):
         sql = f"SELECT body, dirt, face, current_clothes, room_lvl, hall, " \
               f"happiness, max_happiness, time_draw, time_read " \
@@ -151,6 +155,10 @@ class Database:
         sql = "SELECT health, happiness, satiety, hygiene, energy FROM Users WHERE peer_id = $1"
         return await self.execute(sql, peer_id, fetchrow=True)
 
+    async def get_for_products_shop(self, peer_id):
+        sql = "SELECT fire_balance, reserve_satiety, satiety, max_satiety FROM Users WHERE peer_id = $1"
+        return await self.execute(sql, peer_id, fetchrow=True)
+
     async def get_user_room_lvl_furniture(self, peer_id, room):
         sql = f"SELECT room_lvl, {room} FROM Users WHERE peer_id = $1"
         return await self.execute(sql, peer_id, fetchrow=True)
@@ -163,9 +171,9 @@ class Database:
         sql = "SELECT clothes FROM Users WHERE peer_id = $1"
         return await self.execute(sql, peer_id, fetchval=True)
 
-    async def get_user_balance(self, peer_id):
-        sql = "SELECT fire_balance FROM Users WHERE peer_id = $1"
-        return await self.execute(sql, peer_id, fetchval=True)
+    async def get_user_full_balance(self, peer_id):
+        sql = "SELECT fire_balance, chung_balance FROM Users WHERE peer_id = $1"
+        return await self.execute(sql, peer_id, fetchrow=True)
 
     async def update_user_time_button(self, peer_id, button, indicator):
         sql = f"UPDATE Users SET time_{button} = $1, {needs_button[button]['indicator']} = $2 WHERE peer_id = $3"
@@ -192,6 +200,10 @@ class Database:
     async def get_user_bonus_time(self, peer_id):
         sql = "SELECT bonus_time FROM Users WHERE peer_id = $1"
         return await self.execute(sql, peer_id, fetchval=True)
+
+    async def get_balance_and_reserve(self, peer_id):
+        sql = "SELECT fire_balance, reserve_satiety FROM Users WHERE peer_id = $1"
+        return await self.execute(sql, peer_id, fetchrow=True)
 
     async def append_clothes(self, peer_id, clothes_num):
         sql = "UPDATE Users SET clothes=array_append(clothes, $1) WHERE peer_id = $2"
@@ -236,6 +248,10 @@ class Database:
         sql = "UPDATE Users SET last_activity=$1 WHERE peer_id=$2"
         return await self.execute(sql, time, peer_id, execute=True)
 
+    async def add_fire_balance(self, peer_id, count):
+        sql = f"UPDATE Users SET fire_balance=fire_balance+$1 WHERE peer_id=$2"
+        return await self.execute(sql, count, peer_id, execute=True)
+
     async def update_balance_furniture(self, peer_id, balance, furniture, lvl):
         sql = f"UPDATE Users SET fire_balance=$1, {furniture}=$2 WHERE peer_id=$3"
         return await self.execute(sql, balance, lvl, peer_id, execute=True)
@@ -262,6 +278,14 @@ class Database:
     async def count_users(self):
         sql = "SELECT COUNT(*) FROM Users"
         return await self.execute(sql, fetchval=True)
+
+    async def check_user_peer_id(self, peer_id):
+        sql = "SELECT peer_id FROM Users WHERE peer_id=$1"
+        return await self.execute(sql, peer_id, fetchval=True)
+
+    async def check_user_id(self, peer_id):
+        sql = "SELECT id FROM Users WHERE id=$1"
+        return await self.execute(sql, peer_id, fetchval=True)
 
     async def delete_users(self):
         await self.execute("DELETE FROM Users WHERE TRUE", execute=True)

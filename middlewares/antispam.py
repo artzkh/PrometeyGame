@@ -61,7 +61,7 @@ class EventSpamMiddleware(BaseMiddleware):
             if user_status == "active":
                 await state_dispenser.set(event.object.peer_id, States.ACTIVE,
                                           last_activity=await db.get_user_last_activity(event.object.peer_id),
-                                          recommendation={})
+                                          recommendation=[])
                 state_peer = await state_dispenser.get(event.object.peer_id)
             elif user_status == "training":
                 await state_dispenser.set(event.object.peer_id, States.TRAINING, position=0)

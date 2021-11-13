@@ -61,7 +61,7 @@ async def handle_message_event(event: GroupTypes.MessageEvent):
                                                    message=message,
                                                    attachment=attachment)
                 elif payload.get('products'):
-                    balance = await config.db.get_user_balance(event.object.peer_id)
+                    balance, reserve = await config.db.get_balance_and_reserve(event.object.peer_id)
                     if balance < products[payload['products']]['fire']:
                         await bp.api.messages.send_message_event_answer(
                             event_id=event.object.event_id,
@@ -82,7 +82,8 @@ async def handle_message_event(event: GroupTypes.MessageEvent):
                             peer_id=event.object.peer_id,
                             event_data=json.dumps({"type": "show_snackbar",
                                                    "text": f"+{products[payload['products']]['reserve']}&#129377; "
-                                                           f"к запасу еды. Баланс: {balance}&#128293;"}))
+                                                           f"к запасу еды. Баланс: {balance}&#128293;"
+                                                           f"{reserve+products[payload['products']]['reserve']}&#129377;"}))
                 elif payload.get('shop_house'):
                     if payload["shop_house"] == "products":
                         await bp.api.messages.edit(peer_id=event.object.peer_id, group_id=GROUP_ID,
@@ -288,7 +289,7 @@ async def handle_message_event(event: GroupTypes.MessageEvent):
                                                        "\n"
                                                        "\nПомощь от государства: 1000 &#128293;")
                     await bp.state_dispenser.set(event.object.peer_id, States.ACTIVE, last_activity=time(),
-                                                 recommendation={})
+                                                 recommendation=[])
                 else:
                     await bp.api.messages.edit(peer_id=event.object.peer_id, group_id=GROUP_ID,
                                                keyboard=keyboards.died,
