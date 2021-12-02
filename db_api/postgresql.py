@@ -159,8 +159,12 @@ class Database:
         sql = "SELECT fire_balance, reserve_satiety, satiety, max_satiety FROM Users WHERE peer_id = $1"
         return await self.execute(sql, peer_id, fetchrow=True)
 
+    async def get_user_room_lvl_balance_rooms(self, peer_id):
+        sql = f"SELECT room_lvl, fire_balance, hall, kitchen, bedroom, bathroom FROM Users WHERE peer_id = $1"
+        return await self.execute(sql, peer_id, fetchrow=True)
+
     async def get_user_room_lvl_furniture(self, peer_id, room):
-        sql = f"SELECT room_lvl, {room} FROM Users WHERE peer_id = $1"
+        sql = f"SELECT room_lvl, {room}, fire_balance FROM Users WHERE peer_id = $1"
         return await self.execute(sql, peer_id, fetchrow=True)
 
     async def get_user_room_lvl_furniture_balance(self, peer_id, furniture):
@@ -174,6 +178,10 @@ class Database:
     async def get_user_full_balance(self, peer_id):
         sql = "SELECT fire_balance, chung_balance FROM Users WHERE peer_id = $1"
         return await self.execute(sql, peer_id, fetchrow=True)
+
+    async def get_user_fire_balance(self, peer_id):
+        sql = "SELECT fire_balance FROM Users WHERE peer_id = $1"
+        return await self.execute(sql, peer_id, fetchval=True)
 
     async def update_user_time_button(self, peer_id, button, indicator):
         sql = f"UPDATE Users SET time_{button} = $1, {needs_button[button]['indicator']} = $2 WHERE peer_id = $3"
@@ -195,6 +203,10 @@ class Database:
 
     async def get_cases_menu(self, peer_id):
         sql = f"SELECT fire_balance, chung_balance, bonus_time FROM Users WHERE peer_id = $1"
+        return await self.execute(sql, peer_id, fetchrow=True)
+
+    async def get_user_rooms(self, peer_id):
+        sql = f"SELECT hall, kitchen, bedroom, bathroom FROM Users WHERE peer_id = $1"
         return await self.execute(sql, peer_id, fetchrow=True)
 
     async def get_user_bonus_time(self, peer_id):
@@ -243,6 +255,12 @@ class Database:
     async def update_username(self, username, peer_id):
         sql = "UPDATE Users SET username=$1 WHERE peer_id=$2"
         return await self.execute(sql, username, peer_id, execute=True)
+
+    async def update_user_room_lvl(self, new_room_lvl, balance, peer_id):
+        sql = f"UPDATE Users SET room_lvl={new_room_lvl}, " \
+              f"fire_balance={balance}, hall=0, kitchen=0, bedroom=0, bathroom=0, " \
+              f"happiness=max_happiness WHERE peer_id=$1"
+        return await self.execute(sql, peer_id, execute=True)
 
     async def update_last_activity(self, peer_id, time):
         sql = "UPDATE Users SET last_activity=$1 WHERE peer_id=$2"

@@ -34,6 +34,9 @@ class MessageSpamMiddleware(BaseMiddleware):
                 await state_dispenser.set(message.peer_id, States.TRAINING, position=0)
                 message.state_peer = await state_dispenser.get(message.peer_id)
                 return True
+            elif user_status == "ban":
+                await state_dispenser.set(message.peer_id, States.SPAM)
+                return MiddlewareResponse(False)
             else:
                 return MiddlewareResponse(False)
         elif message.state_peer.state == States.SPAM:
@@ -76,6 +79,9 @@ class EventSpamMiddleware(BaseMiddleware):
                 )
                 await state_dispenser.set(event.object.peer_id, States.TRAINING, position=0)
                 return
+            elif user_status == "ban":
+                await state_dispenser.set(event.object.peer_id, States.SPAM)
+                return MiddlewareResponse(False)
             else:
                 return MiddlewareResponse(False)
         elif state_peer.state == States.SPAM:

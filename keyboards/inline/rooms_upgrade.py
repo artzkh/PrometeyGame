@@ -1,5 +1,32 @@
 from vkbottle import Keyboard, KeyboardButtonColor, Callback
 
+upgrade_room_lvl_hall = (
+    Keyboard(one_time=False, inline=True)
+    .add(Callback("Отмена", payload={"room_menu": "hall"}), color=KeyboardButtonColor.NEGATIVE)
+    .add(Callback("Купить", payload={"room_upgrade": "lvl"}), color=KeyboardButtonColor.SECONDARY)
+    .get_json()
+)
+
+upgrade_room_lvl_kitchen = (
+    Keyboard(one_time=False, inline=True)
+    .add(Callback("Отмена", payload={"room_menu": "kitchen"}), color=KeyboardButtonColor.NEGATIVE)
+    .add(Callback("Купить", payload={"room_upgrade": "lvl"}), color=KeyboardButtonColor.SECONDARY)
+    .get_json()
+)
+
+upgrade_room_lvl_bedroom = (
+    Keyboard(one_time=False, inline=True)
+    .add(Callback("Отмена", payload={"room_menu": "bedroom"}), color=KeyboardButtonColor.NEGATIVE)
+    .add(Callback("Купить", payload={"room_upgrade": "lvl"}), color=KeyboardButtonColor.SECONDARY)
+    .get_json()
+)
+
+upgrade_room_lvl_bathroom = (
+    Keyboard(one_time=False, inline=True)
+    .add(Callback("Отмена", payload={"room_menu": "bathroom"}), color=KeyboardButtonColor.NEGATIVE)
+    .add(Callback("Купить", payload={"room_upgrade": "lvl"}), color=KeyboardButtonColor.SECONDARY)
+    .get_json()
+)
 
 upgrade_hall = (
     Keyboard(one_time=False, inline=True)

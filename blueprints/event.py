@@ -1,7 +1,7 @@
 from asyncio import sleep
 from time import time, strftime, gmtime
 import json
-from random import choice
+from random import choice, randint
 
 from vkbottle import VKAPIError, EMPTY_KEYBOARD
 from vkbottle.bot import Blueprint
@@ -12,8 +12,8 @@ import config
 from config import GROUP_ID, db
 from functions import room_upgrade_message, buy_room_upgrade, kitchen_generator, \
     bedroom_generator, bathroom_generator, hall_generator, room_caller, kitchen_buy_satiety
-from settings import event_block_time
-from settings.cannot_change import products, needs_button
+from settings import event_block_time, rooms_update
+from settings.cannot_change import products, needs_button, customers
 from states import States
 
 import errors
@@ -200,16 +200,118 @@ async def handle_message_event(event: GroupTypes.MessageEvent):
                     elif payload["room_upgrade"] == "bathroom":
                         room = 4
                         keyboard = keyboards.upgrade_bathroom
-                    else:
+                    elif payload["room_upgrade"] == "hall":
                         room = 1
                         keyboard = keyboards.upgrade_hall
+                    else:
+                        price = int(payload["room_upgrade"])
+                        room_lvl, balance, hall, kitchen, bedroom, bathroom = \
+                            await db.get_user_room_lvl_balance_rooms(peer_id=event.object.peer_id)
+                        rooms = [hall, kitchen, bedroom, bathroom]
+                        for room in range(4):
+                            if rooms[room] != len(rooms_update[room_lvl][room + 1]):
+                                await bp.api.messages.delete(peer_id=event.object.peer_id, group_id=GROUP_ID,
+                                                             user_id=event.object.user_id,
+                                                             conversation_message_ids=[
+                                                                 event.object.conversation_message_id],
+                                                             delete_for_all=True)
+                                return
+                        if room_lvl < len(rooms_update):
+                            if balance >= price > 0:
+                                new_balance = balance - price
+                                await db.update_user_room_lvl(room_lvl + 1, new_balance,
+                                                              event.object.peer_id)
+                                attachment, _, keyboard = await hall_generator(peer_id=event.object.peer_id, rec=rec)
+                                if room_lvl == 1:
+                                    message = "Ура-ура, наконец-то мы выбрались из этой хрущевки!\n" \
+                                             f"Покупка квартиры: -{price}&#128293;\n" \
+                                             f"Баланс: {new_balance}&#128293;"
+                                else:
+                                    message = "Обожаю новоселья! &#127881;\n" \
+                                              f"Покупка квартиры: -{price:,}&#128293;\n" \
+                                              f"Баланс: {new_balance:,}&#128293;"
+                                await bp.api.messages.edit(peer_id=event.object.peer_id, group_id=GROUP_ID,
+                                                           keyboard=keyboard,
+                                                           conversation_message_id=event.object.conversation_message_id,
+                                                           attachment=attachment,
+                                                           message=message)
+                                await bp.state_dispenser.set(event.object.peer_id, States.ACTIVE,
+                                                             last_activity=peer_state.payload["last_activity"],
+                                                             recommendation=peer_state.payload["recommendation"])
+                            else:
+                                await bp.api.messages.send_message_event_answer \
+                                    (event_id=event.object.event_id,
+                                     user_id=event.object.user_id,
+                                     peer_id=event.object.peer_id,
+                                     event_data=json.dumps({"type": "show_snackbar",
+                                                            "text": f"Не хватает "
+                                                                    f"{price - balance:,}"
+                                                                    f"&#129377;"}))
+                        else:
+                            await bp.api.messages.send_message_event_answer \
+                                (event_id=event.object.event_id,
+                                 user_id=event.object.user_id,
+                                 peer_id=event.object.peer_id,
+                                 event_data=json.dumps({"type": "show_snackbar",
+                                                        "text": f"Ты достиг фэншуя! &#9775;"}))
+                        return
 
-                    message = await room_upgrade_message(event.object.peer_id, room)
+                    message, attachment = await room_upgrade_message(event.object.peer_id, room)
                     if message:
                         await bp.api.messages.edit(peer_id=event.object.peer_id, group_id=GROUP_ID,
                                                    keyboard=keyboard,
                                                    conversation_message_id=event.object.conversation_message_id,
+                                                   attachment=attachment,
                                                    message=message)
+                    elif message is None:
+                        if peer_state.payload.get("num_offer"):
+                            if peer_state.payload["num_offer"] > 2:
+                                await bp.api.messages.send_message_event_answer(event_id=event.object.event_id,
+                                                                                user_id=event.object.user_id,
+                                                                                peer_id=event.object.peer_id,
+                                                                                event_data=json.dumps({
+                                                                                    "type": "show_snackbar",
+                                                                                    "text": "Предложения скоро появятся &#128172;"}))
+                                return
+                            else:
+                                await bp.state_dispenser.set(event.object.peer_id, States.ACTIVE,
+                                                             last_activity=peer_state.payload["last_activity"],
+                                                             recommendation=peer_state.payload["recommendation"],
+                                                             num_offer=peer_state.payload["num_offer"]+1)
+                        else:
+                            await bp.state_dispenser.set(event.object.peer_id, States.ACTIVE,
+                                                         last_activity=peer_state.payload["last_activity"],
+                                                         recommendation=peer_state.payload["recommendation"],
+                                                         num_offer=1)
+                        if room == 2:
+                            keyboard = keyboards.upgrade_room_lvl_kitchen
+                        elif room == 3:
+                            keyboard = keyboards.upgrade_room_lvl_bedroom
+                        elif room == 4:
+                            keyboard = keyboards.upgrade_room_lvl_bathroom
+                        else:
+                            keyboard = keyboards.upgrade_room_lvl_hall
+                        balance = await db.get_user_fire_balance(peer_id=event.object.peer_id)
+                        price = randint(1, 10)
+                        if price == 2:
+                            price = choice([8499, 7700, 7499, 7000, 6999])
+                            await bp.api.messages.edit(peer_id=event.object.peer_id, group_id=GROUP_ID,
+                                                       conversation_message_id=event.object.conversation_message_id,
+                                                       keyboard=keyboard.replace('lvl', str(price)),
+                                                       message=f"&#128081; Предложение от админов &#128081;\n"
+                                                               f"[id318378590|Артём] и [id214904186|Артем] предложили "
+                                                               f"купить квартиру"
+                                                               f"\n\nЦена: {price}&#128293;"
+                                                               f"\nБаланс: {balance}&#128293;")
+                        else:
+                            price = choice([9499, 9999, 10000, 12499, 11990, 13500, 15000, 19900, 22000])
+                            await bp.api.messages.edit(peer_id=event.object.peer_id, group_id=GROUP_ID,
+                                                       conversation_message_id=event.object.conversation_message_id,
+                                                       keyboard=keyboard.replace('lvl', str(price)),
+                                                       message=f"{choice(customers)} "
+                                                               f"купить новую квартиру"
+                                                               f"\n\nЦена: {price}&#128293;"
+                                                               f"\nБаланс: {balance}&#128293;")
                     else:
                         await bp.api.messages.send_message_event_answer(event_id=event.object.event_id,
                                                                         user_id=event.object.user_id,
@@ -236,12 +338,13 @@ async def handle_message_event(event: GroupTypes.MessageEvent):
                         keyboard = [keyboards.buy_upgrade_hall_false,
                                     keyboards.buy_upgrade_hall_true]
 
-                    message = await buy_room_upgrade(event.object.peer_id, room)
+                    message, attachment = await buy_room_upgrade(event.object.peer_id, room)
                     if message:
                         if isinstance(message, str):
                             await bp.api.messages.edit(peer_id=event.object.peer_id, group_id=GROUP_ID,
                                                        keyboard=keyboard[1],
                                                        conversation_message_id=event.object.conversation_message_id,
+                                                       attachment=attachment,
                                                        message=message)
                         else:
                             await bp.api.messages.edit(peer_id=event.object.peer_id, group_id=GROUP_ID,
@@ -249,10 +352,67 @@ async def handle_message_event(event: GroupTypes.MessageEvent):
                                                        conversation_message_id=event.object.conversation_message_id,
                                                        message=f"Эй, обмануть меня решил? "
                                                                f"Тут не хватает {message} &#128293;")
+                    elif message is None:
+                        if peer_state.payload.get("num_offer"):
+                            if peer_state.payload["num_offer"] > 2:
+                                await bp.api.messages.send_message_event_answer(event_id=event.object.event_id,
+                                                                                user_id=event.object.user_id,
+                                                                                peer_id=event.object.peer_id,
+                                                                                event_data=json.dumps({
+                                                                                    "type": "show_snackbar",
+                                                                                    "text": "Предложения скоро появятся &#128172;"}))
+                                return
+                            else:
+                                await bp.state_dispenser.set(event.object.peer_id, States.ACTIVE,
+                                                             last_activity=peer_state.payload["last_activity"],
+                                                             recommendation=peer_state.payload["recommendation"],
+                                                             num_offer=peer_state.payload["num_offer"]+1)
+                        else:
+                            await bp.state_dispenser.set(event.object.peer_id, States.ACTIVE,
+                                                         last_activity=peer_state.payload["last_activity"],
+                                                         recommendation=peer_state.payload["recommendation"],
+                                                         num_offer=1)
+                        if room == 2:
+                            keyboard = keyboards.upgrade_room_lvl_kitchen
+                        elif room == 3:
+                            keyboard = keyboards.upgrade_room_lvl_bedroom
+                        elif room == 4:
+                            keyboard = keyboards.upgrade_room_lvl_bathroom
+                        else:
+                            keyboard = keyboards.upgrade_room_lvl_hall
+                        balance = await db.get_user_fire_balance(peer_id=event.object.peer_id)
+                        price = randint(1, 10)
+                        if price == 2:
+                            price = choice([8499, 7700, 7499, 7000, 6999])
+                            await bp.api.messages.edit(peer_id=event.object.peer_id, group_id=GROUP_ID,
+                                                       conversation_message_id=event.object.conversation_message_id,
+                                                       keyboard=keyboard.replace('lvl', str(price)),
+                                                       message=f"&#128081; Предложение от админов &#128081;\n"
+                                                               f"[id318378590|Артём] и [id214904186|Артем] предложили "
+                                                               f"купить квартиру"
+                                                               f"\n\nЦена: {price}&#128293;"
+                                                               f"\nБаланс: {balance}&#128293;")
+                        else:
+                            price = choice([9499, 9999, 10000, 12499, 11990, 13500, 15000, 19900, 22000])
+                            await bp.api.messages.edit(peer_id=event.object.peer_id, group_id=GROUP_ID,
+                                                       conversation_message_id=event.object.conversation_message_id,
+                                                       keyboard=keyboard.replace('lvl', str(price)),
+                                                       message=f"{choice(customers)} "
+                                                               f"купить новую квартиру"
+                                                               f"\n\nЦена: {price}&#128293;"
+                                                               f"\nБаланс: {balance}&#128293;")
+                        await bp.state_dispenser.set(event.object.peer_id, States.ACTIVE,
+                                                     last_activity=peer_state.payload["last_activity"],
+                                                     recommendation=peer_state.payload["recommendation"],
+                                                     price=price)
                     else:
-                        await bp.api.messages.delete(peer_id=event.object.peer_id, group_id=GROUP_ID,
-                                                     user_id=event.object.user_id, delete_for_all=True,
-                                                     conversation_message_ids=[event.object.conversation_message_id])
+                        await bp.api.messages.send_message_event_answer(event_id=event.object.event_id,
+                                                                        user_id=event.object.user_id,
+                                                                        peer_id=event.object.peer_id,
+                                                                        event_data=json.dumps({
+                                                                            "type": "show_snackbar",
+                                                                            "text": "Заходи за апгрейдами к "
+                                                                                    "другим комнатам &#128717;"}))
                 elif payload.get("died"):
                     await bp.api.messages.delete(peer_id=event.object.peer_id, group_id=GROUP_ID,
                                                  user_id=event.object.user_id,
