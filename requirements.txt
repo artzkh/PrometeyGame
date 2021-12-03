@@ -1,0 +1,4 @@
+https://github.com/timoniq/vkbottle/archive/master.zip
+python-dotenv==0.19.2
+asyncpg==0.25.0
+
