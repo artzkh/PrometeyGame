@@ -3,9 +3,6 @@ from math import ceil
 from vkbottle.bot import Message, Blueprint
 
 from config import db
-from functions import generate_attachment
-from functions.cases import is_bonus
-from json_data import pictures
 from states import States
 
 import keyboards
@@ -16,7 +13,7 @@ bp = Blueprint("shop")
 @bp.on.private_message(state=States.ACTIVE, payload={"main_menu": "shop_menu"})
 async def shop_menu(message: Message):
     await message.answer("Куда отправимся?", keyboard=keyboards.shop_menu,
-                         attachment="photo318378590_457298968")
+                         attachment="photo318378590_457299623")
 
 
 @bp.on.private_message(state=States.ACTIVE, payload={"shop": "indicators"})
@@ -41,7 +38,7 @@ async def indicators(message: Message):
 @bp.on.private_message(state=States.ACTIVE, payload={"shop": "back_to_menu"})
 async def back_to_indicators(message: Message):
     await message.answer("Зайдём куда-нибудь ещё?", keyboard=keyboards.shop_menu,
-                         attachment="photo318378590_457298968")
+                         attachment="photo318378590_457299623")
 
 
 @bp.on.private_message(state=States.ACTIVE, payload={"shop": "products"})
@@ -82,3 +79,38 @@ async def products_gastronomy(message: Message):
     await message.answer(f"Баланс: {balance}&#128293;{reserve}&#129377;"
                          f"\nСытость: {ceil(satiety)}/{max_satiety}&#127831;", keyboard=keyboards.shop_products_meat,
                          attachment="photo318378590_457298977")
+
+
+@bp.on.private_message(state=States.ACTIVE, payload={"shop": "coffee"})
+async def products(message: Message):
+    await message.answer("Ты можешь заказать любое блюдо из меню."
+                         "\n&#128293; — цена", keyboard=keyboards.shop_coffee,
+                         attachment="photo318378590_457298978")
+
+
+@bp.on.private_message(state=States.ACTIVE, payload={"shop": "sauna"})
+async def products(message: Message):
+    await message.answer("Купи веник и мы тебя хорошенько отпарим!"
+                         "\n&#128293; — цена", keyboard=keyboards.shop_coffee,
+                         attachment="photo318378590_457298979")
+
+
+@bp.on.private_message(state=States.ACTIVE, payload={"shop": "game"})
+async def products(message: Message):
+    await message.answer("Добро пожаловать в игровой клуб!"
+                         "\n&#128293; — цена", keyboard=keyboards.shop_coffee,
+                         attachment="photo318378590_457298981")
+
+
+@bp.on.private_message(state=States.ACTIVE, payload={"shop": "hookah"})
+async def products(message: Message):
+    await message.answer("VIP-комната, здесь всё самое вкусное."
+                         "\n&#128293; — цена", keyboard=keyboards.shop_coffee,
+                         attachment="photo318378590_457298982")
+
+
+@bp.on.private_message(state=States.ACTIVE, payload={"shop": "pharmacy"})
+async def products(message: Message):
+    await message.answer("В аптеке есть всё для твоего здоровья."
+                         "\n&#128293; — цена", keyboard=keyboards.shop_coffee,
+                         attachment="photo318378590_457299722")

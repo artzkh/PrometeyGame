@@ -96,7 +96,7 @@ async def handle_message_event(event: GroupTypes.MessageEvent):
                                                    keyboard=keyboards.coffee_house,
                                                    conversation_message_id=event.object.conversation_message_id,
                                                    message='Кофейня',
-                                                   attachment='photo318378590_457298978')
+                                                   attachment='photo318378590_457299697')
                     elif payload["shop_house"] == "sauna":
                         await bp.api.messages.edit(peer_id=event.object.peer_id, group_id=GROUP_ID,
                                                    keyboard=keyboards.sauna_house,
@@ -108,13 +108,19 @@ async def handle_message_event(event: GroupTypes.MessageEvent):
                                                    keyboard=keyboards.game_house,
                                                    conversation_message_id=event.object.conversation_message_id,
                                                    message='Геймерская',
-                                                   attachment='photo318378590_457298981')
+                                                   attachment='photo318378590_457299696')
                     elif payload["shop_house"] == "hookah":
                         await bp.api.messages.edit(peer_id=event.object.peer_id, group_id=GROUP_ID,
                                                    keyboard=keyboards.hookah_house,
                                                    conversation_message_id=event.object.conversation_message_id,
-                                                   message='Кальянная',
+                                                   message='VIP-комната',
                                                    attachment='photo318378590_457298982')
+                    elif payload["shop_house"] == "pharmacy":
+                        await bp.api.messages.edit(peer_id=event.object.peer_id, group_id=GROUP_ID,
+                                                   keyboard=keyboards.pharmacy_house,
+                                                   conversation_message_id=event.object.conversation_message_id,
+                                                   message='Аптека',
+                                                   attachment='photo318378590_457299695')
                 elif payload.get('reserve'):
                     reserve, ind, max_ind, ration = await config.db.get_user_reserve_satiety(event.object.peer_id)
                     if ind > max_ind - 1:
@@ -318,7 +324,7 @@ async def handle_message_event(event: GroupTypes.MessageEvent):
                                                                         peer_id=event.object.peer_id,
                                                                         event_data=json.dumps({
                                                                             "type": "show_snackbar",
-                                                                            "text": "Заходи за апгрейдами к "
+                                                                            "text": "Заходи за мебелью к "
                                                                                     "другим комнатам &#128717;"}))
                 elif payload.get("buy_upgrade"):
                     if payload["buy_upgrade"] == "kitchen":
@@ -350,8 +356,8 @@ async def handle_message_event(event: GroupTypes.MessageEvent):
                             await bp.api.messages.edit(peer_id=event.object.peer_id, group_id=GROUP_ID,
                                                        keyboard=keyboard[0],
                                                        conversation_message_id=event.object.conversation_message_id,
-                                                       message=f"Эй, обмануть меня решил? "
-                                                               f"Тут не хватает {message} &#128293;")
+                                                       message=f"Эй, обмануть меня решил?"
+                                                               f"\nТут не хватает {message}&#128293;")
                     elif message is None:
                         if peer_state.payload.get("num_offer"):
                             if peer_state.payload["num_offer"] > 2:
@@ -411,7 +417,7 @@ async def handle_message_event(event: GroupTypes.MessageEvent):
                                                                         peer_id=event.object.peer_id,
                                                                         event_data=json.dumps({
                                                                             "type": "show_snackbar",
-                                                                            "text": "Заходи за апгрейдами к "
+                                                                            "text": "Заходи за мебелью к "
                                                                                     "другим комнатам &#128717;"}))
                 elif payload.get("died"):
                     await bp.api.messages.delete(peer_id=event.object.peer_id, group_id=GROUP_ID,

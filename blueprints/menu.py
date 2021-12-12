@@ -1,7 +1,7 @@
 from vkbottle.bot import Message, Blueprint
 
 from config import db
-from functions import generate_attachment
+from functions import generate_attachment, get_passport_info
 from functions.cases import is_bonus
 from functions.generate_attachment import hall_generator
 from json_data import pictures
@@ -31,6 +31,12 @@ async def back_to_menu(message: Message):
         await message.answer("Главное меню", keyboard=keyboards.menu_positive)
     else:
         await message.answer("Главное меню", keyboard=keyboards.menu_negative)
+
+
+@bp.on.private_message(state=States.ACTIVE, payload={"main_menu": "passport"})
+async def back_to_menu(message: Message):
+    passport_info, attachment = await get_passport_info(message.peer_id)
+    await message.answer(message=passport_info, attachment=attachment)
 
 
 @bp.on.private_message(state=States.ACTIVE, payload={"main_menu": "room_hall"})

@@ -4,10 +4,10 @@ from settings.cannot_change import products
 
 shop_menu = (
     Keyboard(one_time=False, inline=False)
-    .add(Text("Потребности &#127828;", payload={"shop": "indicators"}), color=KeyboardButtonColor.SECONDARY)
+    .add(Text("Центр &#127978;", payload={"shop": "indicators"}), color=KeyboardButtonColor.SECONDARY)
     .row()
-    .add(Text("Аптека &#129505;"), color=KeyboardButtonColor.SECONDARY)
     .add(Text("Одежда &#128088;"), color=KeyboardButtonColor.SECONDARY)
+    .add(Text("Работа &#128188;"), color=KeyboardButtonColor.SECONDARY)
     .row()
     .add(Text("Домой&#127968;", payload={"main_menu": "back"}), color=KeyboardButtonColor.SECONDARY)
     .get_json()
@@ -77,6 +77,27 @@ shop_products_meat = (
 )
 
 shop_products_gastronomy = (
+    Keyboard(one_time=False, inline=False)
+    .add(Callback(f"{products['croissant']['emoji']} ({products['croissant']['fire']}&#128293;"
+                  f"{products['croissant']['reserve']}&#129377;)",
+                  payload={"products": "croissant"}),
+         color=KeyboardButtonColor.SECONDARY)
+    .add(Callback(f"{products['doughnut']['emoji']} ({products['doughnut']['fire']}&#128293;"
+                  f"{products['doughnut']['reserve']}&#129377;)",
+                  payload={"products": "doughnut"}),
+         color=KeyboardButtonColor.SECONDARY)
+    .row()
+    .add(Callback(f"{products['cake']['emoji']} ({products['cake']['fire']}&#128293;"
+                  f"{products['cake']['reserve']}&#129377;)",
+                  payload={"products": "cake"}),
+         color=KeyboardButtonColor.SECONDARY)
+    .add(Text("Фастфуд &#10145;", payload={"shop": "products_fastfood"}), color=KeyboardButtonColor.SECONDARY)
+    .row()
+    .add(Text("&#11013; Назад", payload={"shop": "back_to_menu"}), color=KeyboardButtonColor.SECONDARY)
+    .get_json()
+)
+
+shop_coffee = (
     Keyboard(one_time=False, inline=False)
     .add(Callback(f"{products['croissant']['emoji']} ({products['croissant']['fire']}&#128293;"
                   f"{products['croissant']['reserve']}&#129377;)",

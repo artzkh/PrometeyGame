@@ -107,13 +107,7 @@ class Database:
 
     async def get_user_hall(self, peer_id):
         sql = f"SELECT body, dirt, face, current_clothes, room_lvl, hall, " \
-              f"happiness, max_happiness, time_draw, time_read " \
-              f"FROM Users WHERE peer_id = $1"
-        return await self.execute(sql, peer_id, fetchrow=True)
-
-    async def get_user_hall_change(self, peer_id):
-        sql = f"SELECT body, dirt, face, current_clothes, room_lvl, hall, " \
-              f"happiness, max_happiness, time_draw, time_read, energy " \
+              f"happiness, max_happiness, time_draw, time_read, health, max_health " \
               f"FROM Users WHERE peer_id = $1"
         return await self.execute(sql, peer_id, fetchrow=True)
 
@@ -125,14 +119,19 @@ class Database:
 
     async def get_user_bedroom(self, peer_id):
         sql = f"SELECT body, dirt, face, current_clothes, room_lvl, bedroom, " \
-              f"energy, max_energy, time_sleep, time_rest " \
+              f"energy, max_energy, time_sleep, time_rest, health, max_health " \
               f"FROM Users WHERE peer_id = $1"
         return await self.execute(sql, peer_id, fetchrow=True)
 
     async def get_user_bathroom(self, peer_id):
         sql = f"SELECT body, dirt, face, current_clothes, room_lvl, bathroom, " \
-              f"hygiene, max_hygiene, time_shower, time_toilet " \
+              f"hygiene, max_hygiene, time_shower, time_toilet, health, max_health " \
               f"FROM Users WHERE peer_id = $1"
+        return await self.execute(sql, peer_id, fetchrow=True)
+
+    async def get_user_passport(self, peer_id):
+        sql = "SELECT username, fire_balance, chung_balance, bonus_day, room_lvl " \
+              "FROM Users WHERE peer_id = $1"
         return await self.execute(sql, peer_id, fetchrow=True)
 
     async def get_user_status(self, peer_id):
