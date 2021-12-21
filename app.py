@@ -4,7 +4,7 @@ from blueprints import bps
 
 from middlewares import EventSpamMiddleware, MessageSpamMiddleware
 from states import state_dispenser
-from config import api, db, ADMINS, GROUP_ID
+from config import api, db
 
 
 def setup_blueprints(bot_: Bot):

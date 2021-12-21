@@ -108,7 +108,7 @@ def generate_attachment(happiness, satiety, hygiene, energy):
 
     recommendations = []
 
-    if hygiene >= rec_limit['hygiene']:
+    if hygiene > rec_limit['hygiene']:
         dirt = 1
     else:
         recommendations.append('hygiene')
@@ -120,7 +120,7 @@ def generate_attachment(happiness, satiety, hygiene, energy):
         body = 4
     elif satiety >= 70:
         body = 3
-    elif satiety >= rec_limit['satiety']:
+    elif satiety > rec_limit['satiety']:
         body = 2
     else:
         recommendations.append('satiety')
@@ -133,7 +133,7 @@ def generate_attachment(happiness, satiety, hygiene, energy):
         face = 1
     elif happiness >= 60 and energy >= 30:
         face = 2
-    elif happiness >= rec_limit['happiness']:
+    elif happiness > rec_limit['happiness']:
         face = 3
     else:
         recommendations.append('happiness')

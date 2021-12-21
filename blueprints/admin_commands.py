@@ -11,7 +11,7 @@ bp = Blueprint("admin_commands")
 
 
 @bp.on.private_message(state=States.ACTIVE, text="/kill <user_id>")
-async def back_to_menu(message: Message, user_id):
+async def command_kill(message: Message, user_id):
     if message.peer_id in ADMINS:
         user_id = await check_id(message, user_id)
         if user_id:
@@ -26,7 +26,7 @@ async def back_to_menu(message: Message, user_id):
 
 
 @bp.on.private_message(state=States.ACTIVE, text="/give <user_id> <count>")
-async def back_to_menu(message: Message, user_id, count):
+async def command_give(message: Message, user_id, count):
     if message.peer_id in ADMINS:
         user_id = await check_id(message, user_id)
         if user_id:
@@ -46,7 +46,7 @@ async def back_to_menu(message: Message, user_id, count):
 
 
 @bp.on.private_message(state=States.ACTIVE, text="/ban <user_id>")
-async def back_to_menu(message: Message, user_id):
+async def command_ban(message: Message, user_id):
     if message.peer_id in ADMINS:
         user_id = await check_id(message, user_id)
         if user_id:
@@ -64,7 +64,7 @@ async def back_to_menu(message: Message, user_id):
 
 
 @bp.on.private_message(state=States.ACTIVE, text="/unban <user_id>")
-async def back_to_menu(message: Message, user_id):
+async def command_unban(message: Message, user_id):
     if message.peer_id in ADMINS:
         user_id = await check_id(message, user_id)
         if user_id:
@@ -89,9 +89,7 @@ async def check_id(message, user_id):
     except ValueError:
         await message.answer("&#10060; Неверный ID &#10060;")
         return False
-    if await db.check_user_id(peer_id=user_id):
-        return await db.get_user_peer_id(user_id)
-    elif not (await db.check_user_peer_id(peer_id=user_id)):
+    if not (await db.check_user_peer_id(peer_id=user_id)):
         await message.answer("&#10060; Неверный ID &#10060;")
         return False
     else:

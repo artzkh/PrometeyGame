@@ -21,6 +21,9 @@ class Database:
             database=config.DB_NAME
         )
 
+    async def close(self):
+        await self.pool.close()
+
     async def execute(self, command, *args,
                       fetch: bool = False,
                       fetchval: bool = False,
@@ -92,18 +95,18 @@ class Database:
         ])
         return sql, tuple(parameters.values())
 
-    async def add_user(self, peer_id, username):
-        sql = "INSERT INTO Users (peer_id, username) VALUES($1, $2) returning *"
-        return await self.execute(sql, peer_id, username, fetchrow=True)
-
     async def select_user(self, **kwargs):
         sql = "SELECT * FROM Users WHERE "
         sql, parameters = self.format_args(sql, parameters=kwargs)
         return await self.execute(sql, *parameters, fetchrow=True)
 
-    async def get_user_peer_id(self, user_id):
-        sql = f"SELECT peer_id FROM Users WHERE id = $1"
-        return await self.execute(sql, user_id, fetchval=True)
+    async def add_user(self, peer_id, username):
+        sql = "INSERT INTO Users (peer_id, username) VALUES($1, $2) returning *"
+        return await self.execute(sql, peer_id, username, fetchrow=True)
+
+    async def del_user(self, peer_id):
+        sql = "DELETE FROM Users WHERE peer_id = $1"
+        return await self.execute(sql, peer_id, execute=True)
 
     async def get_user_hall(self, peer_id):
         sql = f"SELECT body, dirt, face, current_clothes, room_lvl, hall, " \
@@ -298,10 +301,6 @@ class Database:
 
     async def check_user_peer_id(self, peer_id):
         sql = "SELECT peer_id FROM Users WHERE peer_id=$1"
-        return await self.execute(sql, peer_id, fetchval=True)
-
-    async def check_user_id(self, peer_id):
-        sql = "SELECT id FROM Users WHERE id=$1"
         return await self.execute(sql, peer_id, fetchval=True)
 
     async def delete_users(self):
