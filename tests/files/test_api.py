@@ -24,6 +24,11 @@ class TestApi(IsolatedAsyncioTestCase):
         except VKAPIError(113):
             pass
 
+        result = (await self.api.users.get(user_ids=['lifestealer86']))[0]
+        print(result)
+        self.assertEqual(result.first_name, 'Михаил')
+        self.assertEqual(result.last_name, 'Фунтиков')
+
         result = (await self.api.users.get(user_ids=[str(TestData.peer_id)]))[0]
         self.assertEqual(result.first_name, 'Артём')
         self.assertEqual(result.last_name,  'Захаров')
