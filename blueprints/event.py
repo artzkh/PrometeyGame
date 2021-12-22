@@ -252,7 +252,7 @@ async def handle_message_event(event: GroupTypes.MessageEvent):
                                      event_data=json.dumps({"type": "show_snackbar",
                                                             "text": f"Не хватает "
                                                                     f"{price - balance:,}"
-                                                                    f"&#129377;"}))
+                                                                    f"&#128293;"}))
                         else:
                             await bp.api.messages.send_message_event_answer \
                                 (event_id=event.object.event_id,
