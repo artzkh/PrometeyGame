@@ -25,7 +25,6 @@ class TestApi(IsolatedAsyncioTestCase):
             pass
 
         result = (await self.api.users.get(user_ids=['lifestealer86']))[0]
-        print(result)
         self.assertEqual(result.first_name, 'Михаил')
         self.assertEqual(result.last_name, 'Фунтиков')
 
