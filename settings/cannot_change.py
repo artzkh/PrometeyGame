@@ -125,17 +125,94 @@ products = {"apple": {
 },
             }
 
-services = {"apple": {
+coffee = {"cookie": {
     'fire': 5,
-    'reserve': 1,
-    'emoji': '&#127823;'
+    'energy': 1,
+    'emoji': '&#127850;'
 },
-            "banana": {
+          "cake": {
     'fire': 9,
-    'reserve': 3,
-    'emoji': '&#127820;'
+    'energy': 3,
+    'emoji': '&#127856;'
+},
+          "coffee": {
+    'fire': 9,
+    'energy': 3,
+    'emoji': '&#9749;'
+},
+          "cocktail": {
+    'fire': 9,
+    'energy': 3,
+    'emoji': '&#127865;'
 }
           }
+
+sauna = {"sponge": {
+    'fire': 5,
+    'hygiene': 1,
+    'emoji': '&#129533;'
+},
+        "soap": {
+    'fire': 9,
+    'hygiene': 3,
+    'emoji': '&#129532;'
+},
+        "lotion": {
+    'fire': 9,
+    'hygiene': 3,
+    'emoji': '&#129524;'
+},
+        "broom": {
+    'fire': 9,
+    'hygiene': 3,
+    'emoji': '&#127808;'
+}
+          }
+
+game = {"joystick": {
+    'fire': 5,
+    'happiness': 1,
+    'emoji': '&#128377;'
+},
+        "karaoke": {
+    'fire': 9,
+    'happiness': 3,
+    'emoji': '&#127908;'
+},
+        "film": {
+    'fire': 9,
+    'happiness': 3,
+    'emoji': '&#127902;'
+},
+        "gamepad": {
+    'fire': 9,
+    'happiness': 3,
+    'emoji': '&#127918;'
+}
+          }
+
+pharmacy = {"mandarin": {
+    'fire': 5,
+    'health': 1,
+    'emoji': '&#127818;'
+},
+        "honey": {
+    'fire': 9,
+    'health': 3,
+    'emoji': '&#127855;'
+},
+        "syringe": {
+    'fire': 9,
+    'health': 3,
+    'emoji': '&#128137;'
+},
+        "pill": {
+        'fire': 9,
+        'health': 3,
+        'emoji': '&#128138;'
+}
+          }
+
 
 customers = ["&#129313; Клоун предложил", "&#128123; Привидение предложило", "&#128107; Влюблённая пара предложила",
              "&#128100; Мировое правительство предложило", "&#128065; Большой Брат предложил",

@@ -216,7 +216,23 @@ class Database:
         return await self.execute(sql, peer_id, fetchval=True)
 
     async def get_balance_and_reserve(self, peer_id):
-        sql = "SELECT fire_balance, reserve_satiety FROM Users WHERE peer_id = $1"
+        sql = "SELECT fire_balance, reserve_satiety, satiety, max_satiety FROM Users WHERE peer_id = $1"
+        return await self.execute(sql, peer_id, fetchrow=True)
+
+    async def get_balance_and_energy(self, peer_id):
+        sql = "SELECT fire_balance, energy, max_energy FROM Users WHERE peer_id = $1"
+        return await self.execute(sql, peer_id, fetchrow=True)
+
+    async def get_balance_and_hygiene(self, peer_id):
+        sql = "SELECT fire_balance, hygiene, max_hygiene FROM Users WHERE peer_id = $1"
+        return await self.execute(sql, peer_id, fetchrow=True)
+
+    async def get_balance_and_happiness(self, peer_id):
+        sql = "SELECT fire_balance, happiness, max_happiness FROM Users WHERE peer_id = $1"
+        return await self.execute(sql, peer_id, fetchrow=True)
+
+    async def get_balance_and_health(self, peer_id):
+        sql = "SELECT fire_balance, health, max_health FROM Users WHERE peer_id = $1"
         return await self.execute(sql, peer_id, fetchrow=True)
 
     async def append_clothes(self, peer_id, clothes_num):
@@ -251,8 +267,24 @@ class Database:
         return await self.execute(sql, ind, reserve, peer_id, execute=True)
 
     async def buy_product(self, peer_id, fire, reserve):
-        sql = "UPDATE Users SET fire_balance=$1, reserve_satiety=reserve_satiety+$2 WHERE peer_id=$3"
+        sql = "UPDATE Users SET fire_balance=$1, reserve_satiety=$2 WHERE peer_id=$3"
         return await self.execute(sql, fire, reserve, peer_id, execute=True)
+
+    async def buy_coffee(self, peer_id, fire, energy):
+        sql = "UPDATE Users SET fire_balance=$1, energy=$2 WHERE peer_id=$3"
+        return await self.execute(sql, fire, energy, peer_id, execute=True)
+
+    async def buy_sauna(self, peer_id, fire, hygiene):
+        sql = "UPDATE Users SET fire_balance=$1, hygiene=$2 WHERE peer_id=$3"
+        return await self.execute(sql, fire, hygiene, peer_id, execute=True)
+
+    async def buy_game(self, peer_id, fire, happiness):
+        sql = "UPDATE Users SET fire_balance=$1, happiness=$2 WHERE peer_id=$3"
+        return await self.execute(sql, fire, happiness, peer_id, execute=True)
+
+    async def buy_pharmacy(self, peer_id, fire, health):
+        sql = "UPDATE Users SET fire_balance=$1, health=$2 WHERE peer_id=$3"
+        return await self.execute(sql, fire, health, peer_id, execute=True)
 
     async def update_username(self, username, peer_id):
         sql = "UPDATE Users SET username=$1 WHERE peer_id=$2"

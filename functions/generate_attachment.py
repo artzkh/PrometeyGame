@@ -142,20 +142,33 @@ async def kitchen_change(peer_id, button, old_satiety, satiety):
     return False
 
 
-async def kitchen_buy_satiety(peer_id, rec, old_satiety, satiety, reserve):
-    old_satiety, satiety = ceil(old_satiety), ceil(satiety)
+async def buy_satiety(peer_id, old_satiety, satiety, reserve):
+
+    if satiety >= 200:
+        body = 5
+    elif satiety >= 120:
+        body = 4
+    elif satiety >= 70:
+        body = 3
+    else:
+        body = 2
 
     if (old_satiety < rec_limit['satiety']) and (satiety >= rec_limit['satiety']):
-        await config.db.buy_satiety_with_attachment(peer_id, satiety, reserve, 2)
-        rec.remove('satiety')
+        await config.db.buy_satiety_with_attachment(peer_id, satiety, reserve, body)
+        return True
     elif (old_satiety < 70) and (satiety >= 70):
-        await config.db.buy_satiety_with_attachment(peer_id, satiety, reserve, 3)
+        await config.db.buy_satiety_with_attachment(peer_id, satiety, reserve, body)
     elif (old_satiety < 120) and (satiety >= 120):
-        await config.db.buy_satiety_with_attachment(peer_id, satiety, reserve, 4)
+        await config.db.buy_satiety_with_attachment(peer_id, satiety, reserve, body)
     elif (old_satiety < 200) and (satiety >= 200):
-        await config.db.buy_satiety_with_attachment(peer_id, satiety, reserve, 5)
+        await config.db.buy_satiety_with_attachment(peer_id, satiety, reserve, body)
     else:
         await config.db.buy_satiety(peer_id, satiety, reserve)
+
+
+async def kitchen_buy_satiety(peer_id, rec, old_satiety, satiety, reserve):
+    if await buy_satiety(peer_id, ceil(old_satiety), ceil(satiety), reserve):
+        rec.remove('satiety')
     attachment, message, keyboard = await kitchen_generator(peer_id, rec)
     return attachment, message, keyboard, rec
 
@@ -251,17 +264,17 @@ def rec_msg(rec):
     for i in rec:
         if i == "health":
             # rec_message = f"Проверить здоровье &#129505;\n" + rec_message
-            rec_message = f"&#129505;" + rec_message
+            rec_message = "&#129505;" + rec_message
         elif i == "satiety":
             # rec_message += f"Перекусить &#127831;\n"
-            rec_message += f"&#127831;"
+            rec_message += "&#127831;"
         elif i == "hygiene":
             # rec_message += f"Сходить в душ &#129532;\n"
-            rec_message += f"&#129531;"
+            rec_message += "&#129531;"
         elif i == "happiness":
             # rec_message += f"Развлечься &#127881;\n"
-            rec_message += f"&#127881;"
+            rec_message += "&#127881;"
         elif i == "energy":
             # rec_message += f"Восстановить энергию &#9889;\n"
-            rec_message += f"&#9889;"
+            rec_message += "&#9889;"
     return "Рекомендации:\n" + rec_message
