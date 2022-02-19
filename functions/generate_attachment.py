@@ -144,24 +144,23 @@ async def kitchen_change(peer_id, button, old_satiety, satiety):
 
 async def buy_satiety(peer_id, old_satiety, satiety, reserve):
 
-    if satiety >= 200:
-        body = 5
-    elif satiety >= 120:
-        body = 4
-    elif satiety >= 70:
-        body = 3
-    else:
-        body = 2
-
     if (old_satiety < rec_limit['satiety']) and (satiety >= rec_limit['satiety']):
+        if satiety >= 200:
+            body = 5
+        elif satiety >= 120:
+            body = 4
+        elif satiety >= 70:
+            body = 3
+        else:
+            body = 2
         await config.db.buy_satiety_with_attachment(peer_id, satiety, reserve, body)
         return True
-    elif (old_satiety < 70) and (satiety >= 70):
-        await config.db.buy_satiety_with_attachment(peer_id, satiety, reserve, body)
-    elif (old_satiety < 120) and (satiety >= 120):
-        await config.db.buy_satiety_with_attachment(peer_id, satiety, reserve, body)
     elif (old_satiety < 200) and (satiety >= 200):
-        await config.db.buy_satiety_with_attachment(peer_id, satiety, reserve, body)
+        await config.db.buy_satiety_with_attachment(peer_id, satiety, reserve, 5)
+    elif (old_satiety < 120) and (satiety >= 120):
+        await config.db.buy_satiety_with_attachment(peer_id, satiety, reserve, 4)
+    elif (old_satiety < 70) and (satiety >= 70):
+        await config.db.buy_satiety_with_attachment(peer_id, satiety, reserve, 3)
     else:
         await config.db.buy_satiety(peer_id, satiety, reserve)
 

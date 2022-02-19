@@ -67,37 +67,37 @@ async def handle_message_event(event: GroupTypes.MessageEvent):
                                                    keyboard=keyboards.products_house,
                                                    conversation_message_id=event.object.conversation_message_id,
                                                    message='Продуктовая лавка',
-                                                   attachment='photo318378590_457300110')
+                                                   attachment='photo318378590_457301296')
                     elif payload["shop_house"] == "coffee":
                         await bp.api.messages.edit(peer_id=event.object.peer_id, group_id=GROUP_ID,
                                                    keyboard=keyboards.coffee_house,
                                                    conversation_message_id=event.object.conversation_message_id,
                                                    message='Кофейня',
-                                                   attachment='photo318378590_457300108')
+                                                   attachment='photo318378590_457301297')
                     elif payload["shop_house"] == "sauna":
                         await bp.api.messages.edit(peer_id=event.object.peer_id, group_id=GROUP_ID,
                                                    keyboard=keyboards.sauna_house,
                                                    conversation_message_id=event.object.conversation_message_id,
                                                    message='Сауна',
-                                                   attachment='photo318378590_457300111')
+                                                   attachment='photo318378590_457301298')
                     elif payload["shop_house"] == "game":
                         await bp.api.messages.edit(peer_id=event.object.peer_id, group_id=GROUP_ID,
                                                    keyboard=keyboards.game_house,
                                                    conversation_message_id=event.object.conversation_message_id,
                                                    message='Игровой клуб',
-                                                   attachment='photo318378590_457300109')
+                                                   attachment='photo318378590_457301299')
                     elif payload["shop_house"] == "hookah":
                         await bp.api.messages.edit(peer_id=event.object.peer_id, group_id=GROUP_ID,
                                                    keyboard=keyboards.hookah_house,
                                                    conversation_message_id=event.object.conversation_message_id,
                                                    message='VIP-комната',
-                                                   attachment='photo318378590_457300112')
+                                                   attachment='photo318378590_457301301')
                     elif payload["shop_house"] == "pharmacy":
                         await bp.api.messages.edit(peer_id=event.object.peer_id, group_id=GROUP_ID,
                                                    keyboard=keyboards.pharmacy_house,
                                                    conversation_message_id=event.object.conversation_message_id,
                                                    message='Аптека',
-                                                   attachment='photo318378590_457300107')
+                                                   attachment='photo318378590_457301300')
                 elif payload.get('reserve'):
                     reserve, ind, max_ind, ration = await config.db.get_user_reserve_satiety(event.object.peer_id)
                     if ind > max_ind - 1:

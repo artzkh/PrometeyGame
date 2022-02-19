@@ -4,6 +4,7 @@ from vkbottle.bot import Message, Blueprint
 from vkbottle.modules import json
 
 from config import db
+from functions import update_hygiene, update_energy, update_happiness
 from keyboards import go_to_kitchen, go_to_bathroom, go_to_hall
 from settings.cannot_change import coffee, products, sauna, game, pharmacy
 from states import States
@@ -24,41 +25,44 @@ async def back_shop(message: Message):
     shop = (json.loads(message.payload))['back_shop']
     if shop == 'products':
         await message.answer("Продуктовая лавка", keyboard=keyboards.products_house,
-                             attachment='photo318378590_457300110')
+                             attachment='photo318378590_457301296')
     elif shop == 'coffee':
         await message.answer("Кофейня", keyboard=keyboards.coffee_house,
-                             attachment='photo318378590_457300108')
+                             attachment='photo318378590_457301297')
     elif shop == 'sauna':
         await message.answer("Сауна", keyboard=keyboards.sauna_house,
-                             attachment='photo318378590_457300111')
+                             attachment='photo318378590_457301298')
     elif shop == 'game':
         await message.answer("Геймерская", keyboard=keyboards.game_house,
-                             attachment='photo318378590_457300109')
+                             attachment='photo318378590_457301299')
     elif shop == 'pharmacy':
         await message.answer("Аптека", keyboard=keyboards.pharmacy_house,
-                             attachment='photo318378590_457300107')
+                             attachment='photo318378590_457301300')
+    else:
+        await message.answer("Кофейня", keyboard=keyboards.coffee_house,
+                             attachment='photo318378590_457301297')
 
 
 @bp.on.private_message(state=States.ACTIVE, payload={"shop": "indicators"})
 async def indicators(message: Message):
     if 'health' in message.state_peer.payload['recommendation']:
         await message.answer("Аптека", keyboard=keyboards.pharmacy_house,
-                             attachment='photo318378590_457300107')
+                             attachment='photo318378590_457301300')
     elif 'energy' in message.state_peer.payload['recommendation']:
         await message.answer("Кофейня", keyboard=keyboards.coffee_house,
-                             attachment='photo318378590_457300108')
+                             attachment='photo318378590_457301297')
     elif 'hygiene' in message.state_peer.payload['recommendation']:
         await message.answer("Сауна", keyboard=keyboards.sauna_house,
-                             attachment='photo318378590_457300111')
+                             attachment='photo318378590_457301298')
     elif 'happiness' in message.state_peer.payload['recommendation']:
         await message.answer("Геймерская", keyboard=keyboards.game_house,
-                             attachment='photo318378590_457300109')
+                             attachment='photo318378590_457301299')
     elif 'satiety' in message.state_peer.payload['recommendation']:
         await message.answer("Продуктовая лавка", keyboard=keyboards.products_house,
-                             attachment='photo318378590_457300110')
+                             attachment='photo318378590_457301296')
     else:
         await message.answer("Кофейня", keyboard=keyboards.coffee_house,
-                             attachment='photo318378590_457300108')
+                             attachment='photo318378590_457301297')
 
 
 @bp.on.private_message(state=States.ACTIVE, payload={"shop": "back_to_menu"})
@@ -171,7 +175,7 @@ async def buy_products(message: Message):
 @bp.on.private_message(state=States.ACTIVE, payload_map={"coffee": str})
 async def buy_coffee(message: Message):
     payload = json.loads(message.payload)
-    balance, energy, max_energy = await db.get_balance_and_energy(message.peer_id)
+    balance, energy, max_energy, happiness = await db.get_balance_and_energy(message.peer_id)
     if balance < coffee[payload['coffee']]['fire']:
         await message.answer(f"Для покупки {coffee[payload['coffee']]['emoji']} "
                              f"не хватает "
@@ -185,7 +189,7 @@ async def buy_coffee(message: Message):
         else:
             new_energy = energy + coffee[payload['coffee']]['energy']
         balance -= coffee[payload['coffee']]['fire']
-        await db.buy_coffee(message.peer_id, balance, new_energy)
+        await update_energy(message.peer_id, energy, new_energy, happiness, balance)
         await message.answer(f"{coffee[payload['coffee']]['emoji']} ( +{coffee[payload['coffee']]['energy']}&#9889;)"
                              f"\nОгонёчков: {balance}&#128293;"
                              f"\nЭнергии: {ceil(new_energy)}/{max_energy}&#9889;")
@@ -208,7 +212,7 @@ async def buy_sauna(message: Message):
         else:
             new_hygiene = hygiene + sauna[payload['sauna']]['hygiene']
         balance -= sauna[payload['sauna']]['fire']
-        await db.buy_sauna(message.peer_id, balance, new_hygiene)
+        await update_hygiene(message.peer_id, hygiene, new_hygiene, balance)
         await message.answer(f"{sauna[payload['sauna']]['emoji']} ( +{sauna[payload['sauna']]['hygiene']}&#129531;)"
                              f"\nОгонёчков: {balance}&#128293;"
                              f"\nГигиена: {ceil(new_hygiene)}/{max_hygiene}&#129531;")
@@ -217,7 +221,7 @@ async def buy_sauna(message: Message):
 @bp.on.private_message(state=States.ACTIVE, payload_map={"game": str})
 async def buy_game(message: Message):
     payload = json.loads(message.payload)
-    balance, happiness, max_happiness = await db.get_balance_and_happiness(message.peer_id)
+    balance, happiness, max_happiness, energy = await db.get_balance_and_happiness(message.peer_id)
     if balance < game[payload['game']]['fire']:
         await message.answer(f"Для покупки {game[payload['game']]['emoji']} "
                              f"не хватает "
@@ -231,7 +235,7 @@ async def buy_game(message: Message):
         else:
             new_happiness = happiness + game[payload['game']]['happiness']
         balance -= game[payload['game']]['fire']
-        await db.buy_game(message.peer_id, balance, new_happiness)
+        await update_happiness(message.peer_id, happiness, new_happiness, energy, balance)
         await message.answer(f"{game[payload['game']]['emoji']} (+{game[payload['game']]['happiness']}&#127881;)"
                              f"\nОгонёчков: {balance}&#128293;"
                              f"\nСчастье: {ceil(new_happiness)}/{max_happiness}&#127881;")

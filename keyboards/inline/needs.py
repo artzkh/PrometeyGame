@@ -37,7 +37,7 @@ game_house = (
 hookah_house = (
     Keyboard(one_time=False, inline=True)
     .add(Callback("&#11013;", payload={"shop_house": "sauna"}), color=KeyboardButtonColor.SECONDARY)
-    .add(Text("Зайти", payload={"shop": "hookah"}), color=KeyboardButtonColor.SECONDARY)
+    .add(Text("Закрыто", payload={"hookah": "closed"}), color=KeyboardButtonColor.NEGATIVE)
     .add(Callback("&#10145;", payload={"shop_house": "pharmacy"}), color=KeyboardButtonColor.SECONDARY)
     .get_json()
 )

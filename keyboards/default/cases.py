@@ -8,7 +8,7 @@ cases_positive = (
     .add(Text("500&#128293;"), color=KeyboardButtonColor.SECONDARY)
     .add(Text("100&#126980;"), color=KeyboardButtonColor.SECONDARY)
     .row()
-    .add(Text("&#11013; Назад", payload={"main_menu": "back"}), color=KeyboardButtonColor.SECONDARY)
+    .add(Text("&#11013; Назад", payload={"main_menu": "back"}), color=KeyboardButtonColor.PRIMARY)
     .get_json()
 )
 
@@ -20,6 +20,6 @@ cases_negative = (
     .add(Text("500&#128293;"), color=KeyboardButtonColor.SECONDARY)
     .add(Text("100&#126980;"), color=KeyboardButtonColor.SECONDARY)
     .row()
-    .add(Text("&#11013; Назад", payload={"main_menu": "back"}), color=KeyboardButtonColor.SECONDARY)
+    .add(Text("&#11013; Назад", payload={"main_menu": "back"}), color=KeyboardButtonColor.PRIMARY)
     .get_json()
 )

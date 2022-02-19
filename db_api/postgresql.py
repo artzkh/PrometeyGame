@@ -95,6 +95,10 @@ class Database:
         ])
         return sql, tuple(parameters.values())
 
+    async def get_fire_balance(self, peer_id):
+        sql = "SELECT fire_balance FROM Users WHERE peer_id = $1 "
+        return await self.execute(sql, peer_id, fetchval=True)
+
     async def select_user(self, **kwargs):
         sql = "SELECT * FROM Users WHERE "
         sql, parameters = self.format_args(sql, parameters=kwargs)
@@ -194,6 +198,15 @@ class Database:
               f"{name} = $3 WHERE peer_id = $4"
         return await self.execute(sql, time(), indicator, value, peer_id, execute=True)
 
+    async def buy_indicator(self, peer_id, indicator_name, indicator_value, balance):
+        sql = f"UPDATE Users SET {indicator_name} = $1, fire_balance = $2 WHERE peer_id = $3"
+        return await self.execute(sql, indicator_value, balance, peer_id, execute=True)
+
+    async def buy_indicator_with_attachment(self, peer_id, indicator_name, indicator_value,
+                                            attachment_name, attachment_value, balance):
+        sql = f"UPDATE Users SET {indicator_name} = $1, {attachment_name} = $2, fire_balance = $3 WHERE peer_id = $4"
+        return await self.execute(sql, indicator_value, attachment_value, balance, peer_id, execute=True)
+
     async def get_user_reserve_satiety(self, peer_id):
         sql = "SELECT reserve_satiety, satiety, max_satiety, time_ration FROM Users WHERE peer_id = $1"
         return await self.execute(sql, peer_id, fetchrow=True)
@@ -220,7 +233,7 @@ class Database:
         return await self.execute(sql, peer_id, fetchrow=True)
 
     async def get_balance_and_energy(self, peer_id):
-        sql = "SELECT fire_balance, energy, max_energy FROM Users WHERE peer_id = $1"
+        sql = "SELECT fire_balance, energy, max_energy, happiness FROM Users WHERE peer_id = $1"
         return await self.execute(sql, peer_id, fetchrow=True)
 
     async def get_balance_and_hygiene(self, peer_id):
@@ -228,7 +241,7 @@ class Database:
         return await self.execute(sql, peer_id, fetchrow=True)
 
     async def get_balance_and_happiness(self, peer_id):
-        sql = "SELECT fire_balance, happiness, max_happiness FROM Users WHERE peer_id = $1"
+        sql = "SELECT fire_balance, happiness, max_happiness, energy FROM Users WHERE peer_id = $1"
         return await self.execute(sql, peer_id, fetchrow=True)
 
     async def get_balance_and_health(self, peer_id):

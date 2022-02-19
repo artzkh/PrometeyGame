@@ -1,15 +1,21 @@
+from random import choice
+
 from vkbottle.bot import Message, Blueprint
 
 from config import db
-from functions import generate_attachment, get_passport_info
+from functions import get_passport_info
 from functions.cases import is_bonus
 from functions.generate_attachment import hall_generator
-from json_data import pictures
 from states import States
 
 import keyboards
 
 bp = Blueprint("main_menu")
+
+
+@bp.on.private_message(state=States.ACTIVE, payload={"main_menu": "games"})
+async def games_menu(message: Message):
+    await message.answer('Выбери игру по душе!', keyboard=choice(keyboards.games_menu))
 
 
 @bp.on.private_message(state=States.ACTIVE, payload={"main_menu": "cases"})
