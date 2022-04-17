@@ -41,8 +41,7 @@ async def back_to_menu(message: Message):
 
 @bp.on.private_message(state=States.ACTIVE, payload={"main_menu": "passport"})
 async def back_to_menu(message: Message):
-    passport_info, attachment = await get_passport_info(message.peer_id)
-    await message.answer(message=passport_info, attachment=attachment)
+    await message.answer(message=await get_passport_info(message.peer_id), attachment="photo318378590_457301656")
 
 
 @bp.on.private_message(state=States.ACTIVE, payload={"main_menu": "room_hall"})

@@ -2,17 +2,6 @@ from vkbottle import Keyboard, KeyboardButtonColor, Text, Callback
 
 from settings.cannot_change import products, coffee, sauna, game, pharmacy
 
-shop_menu = (
-    Keyboard(one_time=False, inline=False)
-    .add(Text("Центр &#127978;", payload={"shop": "indicators"}), color=KeyboardButtonColor.SECONDARY)
-    .row()
-    .add(Text("Одежда &#128088;"), color=KeyboardButtonColor.SECONDARY)
-    .add(Text("Работа &#128188;"), color=KeyboardButtonColor.SECONDARY)
-    .row()
-    .add(Text("Домой&#127968;", payload={"main_menu": "back"}), color=KeyboardButtonColor.PRIMARY)
-    .get_json()
-)
-
 shop_products_fruits = (
     Keyboard(one_time=False, inline=False)
     .add(Text(f"{products['apple']['emoji']} ({products['apple']['fire']}&#128293;"
@@ -222,4 +211,3 @@ shop_hookah = (
     .add(Text("Домой&#127968;", payload={"main_menu": "back"}), color=KeyboardButtonColor.PRIMARY)
     .get_json()
 )
-

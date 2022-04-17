@@ -6,4 +6,4 @@ class States(BaseStateGroup):
     ACTIVE = 1
     DIED = 2
     SPAM = 3
-    BAN = 4
+    ROULETTE = 4

@@ -41,19 +41,18 @@ class MessageSpamMiddleware(BaseMiddleware):
                 return MiddlewareResponse(False)
         elif message.state_peer.state == States.SPAM:
             return False
-        elif message.state_peer.state == States.TRAINING or message.state_peer.state == States.DIED:
-            return True
-        if (time() - message.state_peer.payload["last_activity"]) // 60 > 5:
-            rec = await calculate_indicators(message.peer_id, message.state_peer.payload["last_activity"])
-            if rec is False:
-                await state_dispenser.set(message.peer_id, States.DIED)
+        elif message.state_peer.state == States.ACTIVE:
+            if (time() - message.state_peer.payload["last_activity"]) // 60 > 5:
+                rec = await calculate_indicators(message.peer_id, message.state_peer.payload["last_activity"])
+                if rec is False:
+                    await state_dispenser.set(message.peer_id, States.DIED)
+                    message.state_peer = await state_dispenser.get(message.peer_id)
+                    await db.update_status(message.peer_id, "died")
+                    return True
+                else:
+                    await state_dispenser.set(message.peer_id, States.ACTIVE,
+                                              last_activity=time(), recommendation=rec)
                 message.state_peer = await state_dispenser.get(message.peer_id)
-                await db.update_status(message.peer_id, "died")
-                return True
-            else:
-                await state_dispenser.set(message.peer_id, States.ACTIVE,
-                                          last_activity=time(), recommendation=rec)
-            message.state_peer = await state_dispenser.get(message.peer_id)
 
 
 class EventSpamMiddleware(BaseMiddleware):

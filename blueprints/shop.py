@@ -16,7 +16,7 @@ bp = Blueprint("shop")
 
 @bp.on.private_message(state=States.ACTIVE, payload={"main_menu": "shop_menu"})
 async def shop_menu(message: Message):
-    await message.answer("Куда отправимся?", keyboard=keyboards.shop_menu,
+    await message.answer("Куда отправимся?", keyboard=keyboards.city_menu,
                          attachment="photo318378590_457299623")
 
 
@@ -43,6 +43,11 @@ async def back_shop(message: Message):
                              attachment='photo318378590_457301297')
 
 
+@bp.on.private_message(state=States.ACTIVE, payload={"shop": "clothes"})
+async def back_shop(message: Message):
+    await message.answer("11111", keyboard=keyboards.shop_clothes_on)
+
+
 @bp.on.private_message(state=States.ACTIVE, payload={"shop": "indicators"})
 async def indicators(message: Message):
     if 'health' in message.state_peer.payload['recommendation']:
@@ -67,7 +72,7 @@ async def indicators(message: Message):
 
 @bp.on.private_message(state=States.ACTIVE, payload={"shop": "back_to_menu"})
 async def back_to_indicators(message: Message):
-    await message.answer("Зайдём куда-нибудь ещё?", keyboard=keyboards.shop_menu,
+    await message.answer("Зайдём куда-нибудь ещё?", keyboard=keyboards.city_menu,
                          attachment="photo318378590_457299623")
 
 

@@ -189,6 +189,10 @@ class Database:
         sql = "SELECT fire_balance FROM Users WHERE peer_id = $1"
         return await self.execute(sql, peer_id, fetchval=True)
 
+    async def update_user_fire_balance(self, peer_id, new_balance):
+        sql = f"UPDATE Users SET fire_balance = $1 WHERE peer_id = $2"
+        return await self.execute(sql, new_balance, peer_id, execute=True)
+
     async def update_user_time_button(self, peer_id, button, indicator):
         sql = f"UPDATE Users SET time_{button} = $1, {needs_button[button]['indicator']} = $2 WHERE peer_id = $3"
         return await self.execute(sql, time(), indicator, peer_id, execute=True)
@@ -252,10 +256,14 @@ class Database:
         sql = "UPDATE Users SET clothes=array_append(clothes, $1) WHERE peer_id = $2"
         return await self.execute(sql, clothes_num, peer_id, execute=True)
 
+    async def update_current_clothes(self, peer_id, clothes_num):
+        sql = "UPDATE Users SET current_clothes=$1 WHERE peer_id = $2"
+        return await self.execute(sql, clothes_num, peer_id, execute=True)
+
     async def start_over(self, peer_id):
         sql = f"UPDATE Users SET last_activity={time()}, status='active', " \
               "fire_balance=1000, chung_balance=0, bonus_day=0, bonus_time=0, body=3, dirt=1, face=2, " \
-              "room_lvl=1, hall=0, kitchen=0, bathroom=0, bedroom=0, current_clothes=1, clothes='{1}', " \
+              "room_lvl=1, hall=0, kitchen=0, bathroom=0, bedroom=0, " \
               "health=100, happiness=100, satiety=100, hygiene=100, energy=100 WHERE peer_id = $1"
         return await self.execute(sql, peer_id, execute=True)
 

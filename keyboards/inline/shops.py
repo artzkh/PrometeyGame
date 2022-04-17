@@ -49,3 +49,21 @@ pharmacy_house = (
     .add(Callback("&#10145;", payload={"shop_house": "coffee"}), color=KeyboardButtonColor.SECONDARY)
     .get_json()
 )
+
+shop_clothes = (
+    Keyboard(one_time=False, inline=True)
+    .add(Text("&#11013;", payload={"clothes_next": "___"}), color=KeyboardButtonColor.SECONDARY)
+    .row()
+    .add(Text("Купить", payload={"clothes": "___"}), color=KeyboardButtonColor.PRIMARY)
+    .add(Text("&#10145;", payload={"clothes_back": "___"}), color=KeyboardButtonColor.PRIMARY)
+    .get_json()
+)
+
+shop_clothes_on = (
+    Keyboard(one_time=False, inline=True)
+    .add(Text("&#11013;", payload={"clothes_next": "___"}), color=KeyboardButtonColor.SECONDARY)
+    .add(Text("Надеть", payload={"clothes": "___"}), color=KeyboardButtonColor.POSITIVE)
+    .add(Text("&#10145;", payload={"clothes_back": "___"}), color=KeyboardButtonColor.SECONDARY)
+    .get_json()
+)
+# Надето купить надеть
