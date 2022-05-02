@@ -12,9 +12,9 @@ from vkbottle_types.events import GroupEventType
 import config
 from config import GROUP_ID, db
 from functions import room_upgrade_message, buy_room_upgrade, kitchen_generator, \
-    bedroom_generator, bathroom_generator, hall_generator, room_caller, kitchen_buy_satiety
+    bedroom_generator, bathroom_generator, hall_generator, room_caller, kitchen_buy_satiety, is_bonus
 from settings import event_block_time, rooms_update
-from settings.cannot_change import products, needs_button, customers, coffee
+from settings.cannot_change import products, needs_button, customers, coffee, clothes_info
 from states import States
 
 import errors
@@ -61,6 +61,23 @@ async def handle_message_event(event: GroupTypes.MessageEvent):
                                                    conversation_message_id=event.object.conversation_message_id,
                                                    message=message,
                                                    attachment=attachment)
+                    elif payload["room_menu"] == "clothes":
+                        attachment, message, keyboard = await hall_generator(peer_id=event.object.peer_id, rec=rec)
+                        await bp.api.messages.edit(peer_id=event.object.peer_id, group_id=GROUP_ID,
+                                                   keyboard=keyboard,
+                                                   conversation_message_id=event.object.conversation_message_id,
+                                                   message=message,
+                                                   attachment=attachment)
+                        if await is_bonus(event.object.peer_id):
+                            await bp.api.messages.send(peer_id=event.object.peer_id, group_id=GROUP_ID,
+                                                       keyboard=keyboards.menu_positive,
+                                                       random_id=0,
+                                                       message="Главное меню")
+                        else:
+                            await bp.api.messages.send(peer_id=event.object.peer_id, group_id=GROUP_ID,
+                                                       keyboard=keyboards.menu_negative,
+                                                       random_id=0,
+                                                       message="Главное меню")
                 elif payload.get('shop_house'):
                     if payload["shop_house"] == "products":
                         await bp.api.messages.edit(peer_id=event.object.peer_id, group_id=GROUP_ID,
@@ -131,7 +148,6 @@ async def handle_message_event(event: GroupTypes.MessageEvent):
                                                    conversation_message_id=event.object.conversation_message_id,
                                                    message=message,
                                                    attachment=attachment)
-
                 elif payload.get('need_button'):
                     time_ind, ind, max_ind = await db.get_user_time_button(event.object.peer_id,
                                                                            payload.get('need_button'))
@@ -173,6 +189,63 @@ async def handle_message_event(event: GroupTypes.MessageEvent):
                             peer_id=event.object.peer_id,
                             event_data=json.dumps({"type": "show_snackbar",
                                                    "text": text}))
+                elif payload.get('clothes_page'):
+                    num = int(payload['clothes_page'])
+                    current_clothes, clothes_list, balance = await db.get_clothes(event.object.peer_id)
+                    clothes = clothes_info.get(num)
+                    if clothes['id'] == current_clothes:
+                        await bp.api.messages.edit(peer_id=event.object.peer_id, group_id=GROUP_ID,
+                                                   keyboard=keyboards.shop_clothes_back(num),
+                                                   conversation_message_id=event.object.conversation_message_id,
+                                                   attachment=clothes['picture'],
+                                                   message=f"✅ {clothes['name']} [{num}/7]\n***\n{clothes['description']}")
+                    elif clothes['id'] in clothes_list:
+                        await bp.api.messages.edit(peer_id=event.object.peer_id, group_id=GROUP_ID,
+                                                   keyboard=keyboards.shop_clothes_off(num),
+                                                   conversation_message_id=event.object.conversation_message_id,
+                                                   attachment=clothes['picture'],
+                                                   message=f"👘 {clothes['name']} [{num}/7]\n***\n{clothes['description']}")
+                    else:
+                        await bp.api.messages.edit(peer_id=event.object.peer_id, group_id=GROUP_ID,
+                                                   keyboard=keyboards.shop_clothes_buy(num),
+                                                   conversation_message_id=event.object.conversation_message_id,
+                                                   attachment=clothes['picture'],
+                                                   message=f"💲 {clothes['name']} [{num}/7]\n***\nЦена: {clothes['cost']}🔥\nБаланс: {balance}🔥")
+                elif payload.get('clothes'):
+                    num = int(payload['clothes'])
+                    current_clothes, clothes_list, balance = await db.get_clothes(event.object.peer_id)
+                    clothes = clothes_info.get(num)
+                    if clothes['id'] == current_clothes:
+                        await bp.api.messages.send_message_event_answer \
+                            (event_id=event.object.event_id,
+                             user_id=event.object.user_id,
+                             peer_id=event.object.peer_id,
+                             event_data=json.dumps({"type": "show_snackbar",
+                                                    "text": f"✅ {clothes['name']} уже на тебе"}))
+                    elif clothes['id'] in clothes_list:
+                        await db.update_current_clothes(event.object.peer_id, clothes['id'])
+                        await bp.api.messages.edit(peer_id=event.object.peer_id, group_id=GROUP_ID,
+                                                   keyboard=keyboards.shop_clothes_back(num),
+                                                   conversation_message_id=event.object.conversation_message_id,
+                                                   attachment=clothes['picture'],
+                                                   message=f"✅ {clothes['name']} [{num}/7]\n***\n{clothes['description']}")
+                    else:
+                        if balance < clothes['cost']:
+                            await bp.api.messages.send_message_event_answer \
+                                (event_id=event.object.event_id,
+                                 user_id=event.object.user_id,
+                                 peer_id=event.object.peer_id,
+                                 event_data=json.dumps({"type": "show_snackbar",
+                                                        "text": f"Тебе не хватает {clothes['cost']-balance} 🔥"}))
+                        else:
+                            balance = balance - clothes['cost']
+                            await db.append_clothes(event.object.peer_id, clothes['id'], balance)
+                            await bp.api.messages.edit(peer_id=event.object.peer_id, group_id=GROUP_ID,
+                                                       keyboard=keyboards.shop_clothes_back(num),
+                                                       conversation_message_id=event.object.conversation_message_id,
+                                                       attachment=clothes['picture'],
+                                                       message=f"✅ {clothes['name']} [{num}/7]\n***\n"
+                                                               f"Покупка: {clothes['cost']}🔥\nБаланс: {balance}🔥")
                 elif payload.get("room_upgrade"):
                     if payload["room_upgrade"] == "kitchen":
                         room = 2
@@ -207,11 +280,11 @@ async def handle_message_event(event: GroupTypes.MessageEvent):
                                 attachment, _, keyboard = await hall_generator(peer_id=event.object.peer_id, rec=rec)
                                 if room_lvl == 1:
                                     message = "Ура-ура, наконец-то мы выбрались из этой хрущевки!\n" \
-                                             f"Покупка квартиры: -{price}&#128293;\n" \
+                                             f"Покупка квартиры: {price}&#128293;\n" \
                                              f"Баланс: {new_balance}&#128293;"
                                 else:
                                     message = "Обожаю новоселья! &#127881;\n" \
-                                              f"Покупка квартиры: -{price:,}&#128293;\n" \
+                                              f"Покупка квартиры: {price:,}&#128293;\n" \
                                               f"Баланс: {new_balance:,}&#128293;"
                                 await bp.api.messages.edit(peer_id=event.object.peer_id, group_id=GROUP_ID,
                                                            keyboard=keyboard,
@@ -330,11 +403,17 @@ async def handle_message_event(event: GroupTypes.MessageEvent):
                                                        attachment=attachment,
                                                        message=message)
                         else:
-                            await bp.api.messages.edit(peer_id=event.object.peer_id, group_id=GROUP_ID,
-                                                       keyboard=keyboard[0],
-                                                       conversation_message_id=event.object.conversation_message_id,
-                                                       message=f"Эй, обмануть меня решил?"
-                                                               f"\nТут не хватает {message}&#128293;")
+                            await bp.api.messages.send_message_event_answer \
+                                (event_id=event.object.event_id,
+                                 user_id=event.object.user_id,
+                                 peer_id=event.object.peer_id,
+                                 event_data=json.dumps({"type": "show_snackbar",
+                                                        "text": f"Тебе не хватает {message}&#128293;"}))
+                            # await bp.api.messages.edit(peer_id=event.object.peer_id, group_id=GROUP_ID,
+                            #                            keyboard=keyboard[0],
+                            #                            conversation_message_id=event.object.conversation_message_id,
+                            #                            message=f"Эй, обмануть меня решил?"
+                            #                                    f"\nТут не хватает {message}&#128293;")
                     elif message is None:
                         if peer_state.payload.get("num_offer"):
                             if peer_state.payload["num_offer"] > 2:

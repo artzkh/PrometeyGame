@@ -6,6 +6,7 @@ from config import db
 from functions import get_passport_info
 from functions.cases import is_bonus
 from functions.generate_attachment import hall_generator
+from settings.cannot_change import clothes_info
 from states import States
 
 import keyboards
@@ -49,3 +50,21 @@ async def rooms_hall(message: Message):
     attachment, msg, keyboard = await hall_generator(peer_id=message.peer_id,
                                                      rec=message.state_peer.payload["recommendation"])
     await message.answer(message=msg, keyboard=keyboard, attachment=attachment)
+
+
+@bp.on.private_message(state=States.ACTIVE, payload={"main_menu": "work"})
+async def works_menu(message: Message):
+    await message.answer(message='Выбери работу из списка, тебя уже ждут!', keyboard=keyboards.works_list)
+
+
+@bp.on.private_message(state=States.ACTIVE, payload={"shop": "clothes"})
+async def clothes_shop(message: Message):
+    num = await db.get_current_clothes(message.peer_id)
+    clothes = {}
+    for i in clothes_info:
+        if clothes_info[i]['id'] == num:
+            clothes = clothes_info[i]
+            num = i
+            break
+    await message.answer(f"✅ {clothes['name']} [{num}/7]"
+                         f"\n***\n{clothes['description']}", keyboard=keyboards.shop_clothes_back(num), attachment=clothes['picture'])

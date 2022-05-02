@@ -43,11 +43,6 @@ async def back_shop(message: Message):
                              attachment='photo318378590_457301297')
 
 
-@bp.on.private_message(state=States.ACTIVE, payload={"shop": "clothes"})
-async def back_shop(message: Message):
-    await message.answer("11111", keyboard=keyboards.shop_clothes_on)
-
-
 @bp.on.private_message(state=States.ACTIVE, payload={"shop": "indicators"})
 async def indicators(message: Message):
     if 'health' in message.state_peer.payload['recommendation']:

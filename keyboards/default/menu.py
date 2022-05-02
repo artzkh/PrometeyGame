@@ -29,7 +29,7 @@ city_menu = (
     .add(Text("Центр &#127978;", payload={"shop": "indicators"}), color=KeyboardButtonColor.SECONDARY)
     .row()
     .add(Text("Одежда &#128088;", payload={"shop": "clothes"}), color=KeyboardButtonColor.SECONDARY)
-    .add(Text("Работа &#128188;"), color=KeyboardButtonColor.SECONDARY)
+    .add(Text("Работа &#128188;", payload={"main_menu": "work"}), color=KeyboardButtonColor.SECONDARY)
     .row()
     .add(Text("Домой&#127968;", payload={"main_menu": "back"}), color=KeyboardButtonColor.PRIMARY)
     .get_json()

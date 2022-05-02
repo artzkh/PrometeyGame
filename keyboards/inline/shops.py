@@ -50,20 +50,35 @@ pharmacy_house = (
     .get_json()
 )
 
-shop_clothes = (
-    Keyboard(one_time=False, inline=True)
-    .add(Text("&#11013;", payload={"clothes_next": "___"}), color=KeyboardButtonColor.SECONDARY)
-    .row()
-    .add(Text("Купить", payload={"clothes": "___"}), color=KeyboardButtonColor.PRIMARY)
-    .add(Text("&#10145;", payload={"clothes_back": "___"}), color=KeyboardButtonColor.PRIMARY)
-    .get_json()
-)
 
-shop_clothes_on = (
-    Keyboard(one_time=False, inline=True)
-    .add(Text("&#11013;", payload={"clothes_next": "___"}), color=KeyboardButtonColor.SECONDARY)
-    .add(Text("Надеть", payload={"clothes": "___"}), color=KeyboardButtonColor.POSITIVE)
-    .add(Text("&#10145;", payload={"clothes_back": "___"}), color=KeyboardButtonColor.SECONDARY)
-    .get_json()
-)
-# Надето купить надеть
+def shop_clothes_buy(num):
+    return (
+        Keyboard(one_time=False, inline=True)
+        .add(Callback("Купить", payload={"clothes": str(num)}), color=KeyboardButtonColor.NEGATIVE)
+        .row()
+        .add(Callback("&#11013;", payload={"clothes_page": str(num-1 if num-1 > 0 else 7)}), color=KeyboardButtonColor.SECONDARY)
+        .add(Callback("&#10145;", payload={"clothes_page": str(num+1 if num+1 < 8 else 1)}), color=KeyboardButtonColor.SECONDARY)
+        .get_json()
+    )
+
+
+def shop_clothes_off(num):
+    return (
+        Keyboard(one_time=False, inline=True)
+        .add(Callback("Надеть", payload={"clothes": str(num)}), color=KeyboardButtonColor.POSITIVE)
+        .row()
+        .add(Callback("&#11013;", payload={"clothes_page": str(num-1 if num-1 > 0 else 7)}), color=KeyboardButtonColor.SECONDARY)
+        .add(Callback("&#10145;", payload={"clothes_page": str(num+1 if num+1 < 8 else 1)}), color=KeyboardButtonColor.SECONDARY)
+        .get_json()
+    )
+
+
+def shop_clothes_back(num):
+    return (
+        Keyboard(one_time=False, inline=True)
+        .add(Callback("Гостиная 🚪", payload={"room_menu": "clothes"}), color=KeyboardButtonColor.SECONDARY)
+        .row()
+        .add(Callback("&#11013;", payload={"clothes_page": str(num-1 if num-1 > 0 else 7)}), color=KeyboardButtonColor.SECONDARY)
+        .add(Callback("&#10145;", payload={"clothes_page": str(num+1 if num+1 < 8 else 1)}), color=KeyboardButtonColor.SECONDARY)
+        .get_json()
+    )

@@ -51,6 +51,7 @@ class Database:
         username VARCHAR(255) NOT NULL,
         last_activity INT DEFAULT 0, 
         status VARCHAR(255) DEFAULT 'training',
+        work_experience INT DEFAULT 0,
         fire_balance BIGINT DEFAULT 0,
         chung_balance BIGINT DEFAULT 0,
         bonus_day SMALLINT DEFAULT 0,
@@ -137,7 +138,7 @@ class Database:
         return await self.execute(sql, peer_id, fetchrow=True)
 
     async def get_user_passport(self, peer_id):
-        sql = "SELECT username, fire_balance, chung_balance, bonus_day, room_lvl " \
+        sql = "SELECT username, fire_balance, chung_balance, bonus_day, room_lvl, work_experience " \
               "FROM Users WHERE peer_id = $1"
         return await self.execute(sql, peer_id, fetchrow=True)
 
@@ -177,9 +178,13 @@ class Database:
         sql = f"SELECT room_lvl, {furniture}, fire_balance FROM Users WHERE peer_id = $1"
         return await self.execute(sql, peer_id, fetchrow=True)
 
-    async def get_user_clothes(self, peer_id):
-        sql = "SELECT clothes FROM Users WHERE peer_id = $1"
+    async def get_current_clothes(self, peer_id):
+        sql = "SELECT current_clothes FROM Users WHERE peer_id = $1"
         return await self.execute(sql, peer_id, fetchval=True)
+
+    async def get_clothes(self, peer_id):
+        sql = "SELECT current_clothes, clothes, fire_balance FROM Users WHERE peer_id = $1"
+        return await self.execute(sql, peer_id, fetchrow=True)
 
     async def get_user_full_balance(self, peer_id):
         sql = "SELECT fire_balance, chung_balance FROM Users WHERE peer_id = $1"
@@ -252,9 +257,10 @@ class Database:
         sql = "SELECT fire_balance, health, max_health FROM Users WHERE peer_id = $1"
         return await self.execute(sql, peer_id, fetchrow=True)
 
-    async def append_clothes(self, peer_id, clothes_num):
-        sql = "UPDATE Users SET clothes=array_append(clothes, $1) WHERE peer_id = $2"
-        return await self.execute(sql, clothes_num, peer_id, execute=True)
+    async def append_clothes(self, peer_id, clothes_num, fire_balance):
+        sql = "UPDATE Users SET current_clothes=$1, clothes=array_append(clothes, $1), " \
+              "fire_balance=$2 WHERE peer_id = $3"
+        return await self.execute(sql, clothes_num, fire_balance, peer_id, execute=True)
 
     async def update_current_clothes(self, peer_id, clothes_num):
         sql = "UPDATE Users SET current_clothes=$1 WHERE peer_id = $2"
@@ -328,8 +334,6 @@ class Database:
     async def update_balance_furniture(self, peer_id, balance, furniture, lvl):
         sql = f"UPDATE Users SET fire_balance=$1, {furniture}=$2 WHERE peer_id=$3"
         return await self.execute(sql, balance, lvl, peer_id, execute=True)
-
-    # Индикаторы
 
     async def update_user_indicators_without_health(self, peer_id, body, dirt, face, happiness,
                                                     satiety, hygiene, energy):
