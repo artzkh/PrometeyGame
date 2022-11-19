@@ -12,33 +12,44 @@ from states import state_dispenser, States
 class MessageSpamMiddleware(BaseMiddleware):
     async def pre(self, message: Message):
         if message.state_peer is None:
-            user_status = await db.get_user_status(peer_id=message.peer_id)
-            if user_status == "active":
-                await state_dispenser.set(message.peer_id, States.ACTIVE,
-                                          last_activity=await db.get_user_last_activity(message.peer_id),
-                                          recommendation=[])
-                message.state_peer = await state_dispenser.get(message.peer_id)
-            elif user_status == "training":
-                await state_dispenser.set(message.peer_id, States.TRAINING, position=0)
-                message.state_peer = await state_dispenser.get(message.peer_id)
-                return True
-            elif user_status == "died":
-                await state_dispenser.set(message.peer_id, States.DIED)
-                message.state_peer = await state_dispenser.get(message.peer_id)
-                return True
-            elif user_status is None:
-                await db.add_user(
-                    peer_id=message.peer_id,
-                    username=(await message.get_user(user_id=message.peer_id)).first_name
-                )
-                await state_dispenser.set(message.peer_id, States.TRAINING, position=0)
-                message.state_peer = await state_dispenser.get(message.peer_id)
-                return True
-            elif user_status == "ban":
-                await state_dispenser.set(message.peer_id, States.SPAM)
-                return MiddlewareResponse(False)
+            if message.action and message.action.member_id == -205473455:
+                if message.action.type == message.action.type.CHAT_INVITE_USER:
+                    return
             else:
-                return MiddlewareResponse(False)
+                user_status = await db.get_user_status(peer_id=message.peer_id)
+                if user_status == "active":
+                    last_activity = await db.get_user_last_activity(message.peer_id)
+                    rec = await calculate_indicators(message.peer_id, last_activity)
+                    if rec is False:
+                        await state_dispenser.set(message.peer_id, States.DIED)
+                        message.state_peer = await state_dispenser.get(message.peer_id)
+                        await db.update_status(message.peer_id, "died")
+                        return True
+                    else:
+                        await state_dispenser.set(message.peer_id, States.ACTIVE,
+                                                  last_activity=time(), recommendation=rec)
+                        message.state_peer = await state_dispenser.get(message.peer_id)
+                elif user_status == "training":
+                    await state_dispenser.set(message.peer_id, States.TRAINING, position=0)
+                    message.state_peer = await state_dispenser.get(message.peer_id)
+                    return True
+                elif user_status == "died":
+                    await state_dispenser.set(message.peer_id, States.DIED)
+                    message.state_peer = await state_dispenser.get(message.peer_id)
+                    return True
+                elif user_status is None:
+                    await db.add_user(
+                        peer_id=message.peer_id,
+                        username=(await message.get_user(user_id=message.peer_id)).first_name
+                    )
+                    await state_dispenser.set(message.peer_id, States.TRAINING, position=0)
+                    message.state_peer = await state_dispenser.get(message.peer_id)
+                    return True
+                elif user_status == "ban":
+                    await state_dispenser.set(message.peer_id, States.SPAM)
+                    return MiddlewareResponse(False)
+                else:
+                    return MiddlewareResponse(False)
         elif message.state_peer.state == States.SPAM:
             return False
         elif message.state_peer.state == States.ACTIVE:

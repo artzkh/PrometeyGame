@@ -72,3 +72,24 @@ async def update_hygiene(peer_id, old_hygiene, new_hygiene, balance):
     else:
         await db.buy_indicator(peer_id, 'hygiene', new_hygiene, balance)
 
+
+async def work_update_cleaner(peer_id, old_energy, new_energy, happiness, balance, work_experience):
+    old_energy, new_energy = ceil(old_energy), ceil(new_energy)
+
+    if happiness >= 100:
+        if (old_energy > 30) and (new_energy <= 30):
+            await db.work_cleaner_update_with_attachment(peer_id, new_energy, balance, 3, work_experience)
+        elif (old_energy > 80) and (new_energy <= 80):
+            await db.work_cleaner_update_with_attachment(peer_id, new_energy, balance, 2, work_experience)
+        else:
+            await db.work_cleaner_update_without_attachment(peer_id, new_energy, balance, work_experience)
+    elif happiness >= 60:
+        if (old_energy > 30) and (new_energy <= 30):
+            await db.work_cleaner_update_with_attachment(peer_id, new_energy, balance, 3, work_experience)
+        else:
+            await db.work_cleaner_update_without_attachment(peer_id, new_energy, balance, work_experience)
+    else:
+        await db.work_cleaner_update_without_attachment(peer_id, new_energy, balance, work_experience)
+
+    if (old_energy >= rec_limit['happiness']) and (new_energy < rec_limit['happiness']):
+        return True

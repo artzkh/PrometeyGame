@@ -66,7 +66,7 @@ class Database:
         bedroom SMALLINT DEFAULT 0,
         current_clothes SMALLINT DEFAULT 1,
         clothes SMALLINT[] DEFAULT '{1}',
-        health REAL DEFAULT 100,
+        health REAL DEFAULT 1000,
         max_health SMALLINT DEFAULT 100,
         happiness REAL DEFAULT 100,
         time_draw INT DEFAULT 0,
@@ -88,6 +88,16 @@ class Database:
         """
         await self.execute(sql, execute=True)
 
+    async def create_table_conversations(self):
+        sql = """
+        CREATE TABLE IF NOT EXISTS Conversations (
+        peer_id BIGINT PRIMARY KEY,
+        id SERIAL,
+        experience BIGINT NOT NULL DEFAULT 0
+        );
+        """
+        await self.execute(sql, execute=True)
+
     @staticmethod
     def format_args(sql, parameters: dict):
         sql += " AND ".join([
@@ -99,6 +109,10 @@ class Database:
     async def get_fire_balance(self, peer_id):
         sql = "SELECT fire_balance FROM Users WHERE peer_id = $1 "
         return await self.execute(sql, peer_id, fetchval=True)
+
+    async def get_fire_work_energy_happiness(self, peer_id):
+        sql = "SELECT fire_balance, work_experience, energy, happiness FROM Users WHERE peer_id = $1 "
+        return await self.execute(sql, peer_id, fetchrow=True)
 
     async def select_user(self, **kwargs):
         sql = "SELECT * FROM Users WHERE "
@@ -215,6 +229,18 @@ class Database:
                                             attachment_name, attachment_value, balance):
         sql = f"UPDATE Users SET {indicator_name} = $1, {attachment_name} = $2, fire_balance = $3 WHERE peer_id = $4"
         return await self.execute(sql, indicator_value, attachment_value, balance, peer_id, execute=True)
+
+    async def work_cleaner_update(self, peer_id, energy, balance, work_experience):
+        sql = f"UPDATE Users SET energy = $1, fire_balance = $2, work_experience = $3 WHERE peer_id = $4"
+        return await self.execute(sql, energy, balance, work_experience, peer_id, execute=True)
+
+    async def work_cleaner_update_with_attachment(self, peer_id, energy, balance, face, work_experience):
+        sql = f"UPDATE Users SET energy = $1, face = $2, fire_balance = $3, work_experience = $4 WHERE peer_id = $5"
+        return await self.execute(sql, energy, face, balance, work_experience, peer_id, execute=True)
+
+    async def work_cleaner_update_without_attachment(self, peer_id, energy, balance, work_experience):
+        sql = f"UPDATE Users SET energy = $1, fire_balance = $2, work_experience = $3 WHERE peer_id = $4"
+        return await self.execute(sql, energy, balance, work_experience, peer_id, execute=True)
 
     async def get_user_reserve_satiety(self, peer_id):
         sql = "SELECT reserve_satiety, satiety, max_satiety, time_ration FROM Users WHERE peer_id = $1"
@@ -351,6 +377,10 @@ class Database:
     async def update_status(self, peer_id, status):
         sql = "UPDATE Users SET status=$1, last_activity=$2 WHERE peer_id=$3"
         return await self.execute(sql, status, time(), peer_id, execute=True)
+
+    async def update_fire_work_energy(self, peer_id, fire, work, energy):
+        sql = "UPDATE Users SET fire_balance=$1, work_experience=$2, energy=$3 WHERE peer_id=$4"
+        return await self.execute(sql, fire, work, energy, peer_id, execute=True)
 
     async def count_users(self):
         sql = "SELECT COUNT(*) FROM Users"

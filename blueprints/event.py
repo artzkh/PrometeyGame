@@ -35,39 +35,247 @@ async def handle_message_event(event: GroupTypes.MessageEvent):
                 if payload.get("room_menu"):
                     if payload["room_menu"] == "hall":
                         attachment, message, keyboard = await hall_generator(peer_id=event.object.peer_id, rec=rec)
-                        await bp.api.messages.edit(peer_id=event.object.peer_id, group_id=GROUP_ID,
-                                                   keyboard=keyboard,
-                                                   conversation_message_id=event.object.conversation_message_id,
-                                                   message=message,
-                                                   attachment=attachment)
+                        try:
+                            await bp.api.messages.edit(peer_id=event.object.peer_id, group_id=GROUP_ID,
+                                                       keyboard=keyboard,
+                                                       conversation_message_id=event.object.conversation_message_id,
+                                                       message=message,
+                                                       attachment=attachment)
+                        except VKAPIError():
+                            await bp.api.messages.send_message_event_answer(
+                                event_id=event.object.event_id,
+                                user_id=event.object.user_id,
+                                peer_id=event.object.peer_id)
+                            try:
+                                await bp.api.messages.send(peer_id=event.object.peer_id, group_id=GROUP_ID,
+                                                           keyboard=keyboard,
+                                                           message=message,
+                                                           attachment=attachment,
+                                                           random_id=0)
+                            except VKAPIError():
+                                await bp.state_dispenser.set(event.object.peer_id, States.SPAM)
+                                await sleep(event_block_time)
+                                for i in range(10):
+                                    try:
+                                        if state == States.ACTIVE:
+                                            await bp.api.messages.send(peer_id=event.object.peer_id,
+                                                                       group_id=GROUP_ID,
+                                                                       random_id=0,
+                                                                       keyboard=keyboards.menu_positive,
+                                                                       message="Персонаж разблокирован!")  # позитив негатив
+                                            await bp.state_dispenser.set(event.object.peer_id, States.ACTIVE,
+                                                                         last_activity=peer_state.payload["last_activity"],
+                                                                         recommendation=peer_state.payload["recommendation"])
+                                            break
+                                        else:
+                                            await bp.api.messages.send(peer_id=event.object.peer_id,
+                                                                       group_id=GROUP_ID,
+                                                                       random_id=0,
+                                                                       keyboard=keyboards.menu_positive,
+                                                                       message="Персонаж разблокирован!")  # позитив негатив
+                                            await bp.state_dispenser.set(event.object.peer_id, States.TRAINING,
+                                                                         time=time(),
+                                                                         messages=0,
+                                                                         position=peer_state.payload["position"])
+                                            break
+                                    except VKAPIError():
+                                        await sleep(event_block_time)
                     elif payload["room_menu"] == "kitchen":
                         attachment, message, keyboard = await kitchen_generator(peer_id=event.object.peer_id, rec=rec)
-                        await bp.api.messages.edit(peer_id=event.object.peer_id, group_id=GROUP_ID,
+                        try:
+                            await bp.api.messages.edit(peer_id=event.object.peer_id, group_id=GROUP_ID,
                                                    keyboard=keyboard,
                                                    conversation_message_id=event.object.conversation_message_id,
                                                    message=message,
                                                    attachment=attachment)
+                        except VKAPIError():
+                            await bp.api.messages.send_message_event_answer(
+                                event_id=event.object.event_id,
+                                user_id=event.object.user_id,
+                                peer_id=event.object.peer_id)
+                            try:
+                                await bp.api.messages.send(peer_id=event.object.peer_id, group_id=GROUP_ID,
+                                                           keyboard=keyboard,
+                                                           message=message,
+                                                           attachment=attachment,
+                                                           random_id=0)
+                            except VKAPIError():
+                                await bp.state_dispenser.set(event.object.peer_id, States.SPAM)
+                                await sleep(event_block_time)
+                                for i in range(10):
+                                    try:
+                                        if state == States.ACTIVE:
+                                            await bp.api.messages.send(peer_id=event.object.peer_id,
+                                                                       group_id=GROUP_ID,
+                                                                       random_id=0,
+                                                                       keyboard=keyboards.menu_positive,
+                                                                       message="Персонаж разблокирован!")  # позитив негатив
+                                            await bp.state_dispenser.set(event.object.peer_id, States.ACTIVE,
+                                                                         last_activity=peer_state.payload[
+                                                                             "last_activity"],
+                                                                         recommendation=peer_state.payload[
+                                                                             "recommendation"])
+                                            break
+                                        else:
+                                            await bp.api.messages.send(peer_id=event.object.peer_id,
+                                                                       group_id=GROUP_ID,
+                                                                       random_id=0,
+                                                                       keyboard=keyboards.menu_positive,
+                                                                       message="Персонаж разблокирован!")  # позитив негатив
+                                            await bp.state_dispenser.set(event.object.peer_id, States.TRAINING,
+                                                                         time=time(),
+                                                                         messages=0,
+                                                                         position=peer_state.payload["position"])
+                                            break
+                                    except VKAPIError():
+                                        await sleep(event_block_time)
                     elif payload["room_menu"] == "bedroom":
                         attachment, message, keyboard = await bedroom_generator(peer_id=event.object.peer_id, rec=rec)
-                        await bp.api.messages.edit(peer_id=event.object.peer_id, group_id=GROUP_ID,
+                        try:
+                            await bp.api.messages.edit(peer_id=event.object.peer_id, group_id=GROUP_ID,
                                                    keyboard=keyboard,
                                                    conversation_message_id=event.object.conversation_message_id,
                                                    message=message,
                                                    attachment=attachment)
+                        except VKAPIError():
+                            await bp.api.messages.send_message_event_answer(
+                                event_id=event.object.event_id,
+                                user_id=event.object.user_id,
+                                peer_id=event.object.peer_id)
+                            try:
+                                await bp.api.messages.send(peer_id=event.object.peer_id, group_id=GROUP_ID,
+                                                           keyboard=keyboard,
+                                                           message=message,
+                                                           attachment=attachment,
+                                                           random_id=0)
+                            except VKAPIError():
+                                await bp.state_dispenser.set(event.object.peer_id, States.SPAM)
+                                await sleep(event_block_time)
+                                for i in range(10):
+                                    try:
+                                        if state == States.ACTIVE:
+                                            await bp.api.messages.send(peer_id=event.object.peer_id,
+                                                                       group_id=GROUP_ID,
+                                                                       random_id=0,
+                                                                       keyboard=keyboards.menu_positive,
+                                                                       message="Персонаж разблокирован!")  # позитив негатив
+                                            await bp.state_dispenser.set(event.object.peer_id, States.ACTIVE,
+                                                                         last_activity=peer_state.payload[
+                                                                             "last_activity"],
+                                                                         recommendation=peer_state.payload[
+                                                                             "recommendation"])
+                                            break
+                                        else:
+                                            await bp.api.messages.send(peer_id=event.object.peer_id,
+                                                                       group_id=GROUP_ID,
+                                                                       random_id=0,
+                                                                       keyboard=keyboards.menu_positive,
+                                                                       message="Персонаж разблокирован!")  # позитив негатив
+                                            await bp.state_dispenser.set(event.object.peer_id, States.TRAINING,
+                                                                         time=time(),
+                                                                         messages=0,
+                                                                         position=peer_state.payload["position"])
+                                            break
+                                    except VKAPIError():
+                                        await sleep(event_block_time)
                     elif payload["room_menu"] == "bathroom":
                         attachment, message, keyboard = await bathroom_generator(peer_id=event.object.peer_id, rec=rec)
-                        await bp.api.messages.edit(peer_id=event.object.peer_id, group_id=GROUP_ID,
+                        try:
+                            await bp.api.messages.edit(peer_id=event.object.peer_id, group_id=GROUP_ID,
                                                    keyboard=keyboard,
                                                    conversation_message_id=event.object.conversation_message_id,
                                                    message=message,
                                                    attachment=attachment)
+                        except VKAPIError():
+                            await bp.api.messages.send_message_event_answer(
+                                event_id=event.object.event_id,
+                                user_id=event.object.user_id,
+                                peer_id=event.object.peer_id)
+                            try:
+                                await bp.api.messages.send(peer_id=event.object.peer_id, group_id=GROUP_ID,
+                                                           keyboard=keyboard,
+                                                           message=message,
+                                                           attachment=attachment,
+                                                           random_id=0)
+                            except VKAPIError():
+                                await bp.state_dispenser.set(event.object.peer_id, States.SPAM)
+                                await sleep(event_block_time)
+                                for i in range(10):
+                                    try:
+                                        if state == States.ACTIVE:
+                                            await bp.api.messages.send(peer_id=event.object.peer_id,
+                                                                       group_id=GROUP_ID,
+                                                                       random_id=0,
+                                                                       keyboard=keyboards.menu_positive,
+                                                                       message="Персонаж разблокирован!")  # позитив негатив
+                                            await bp.state_dispenser.set(event.object.peer_id, States.ACTIVE,
+                                                                         last_activity=peer_state.payload[
+                                                                             "last_activity"],
+                                                                         recommendation=peer_state.payload[
+                                                                             "recommendation"])
+                                            break
+                                        else:
+                                            await bp.api.messages.send(peer_id=event.object.peer_id,
+                                                                       group_id=GROUP_ID,
+                                                                       random_id=0,
+                                                                       keyboard=keyboards.menu_positive,
+                                                                       message="Персонаж разблокирован!")  # позитив негатив
+                                            await bp.state_dispenser.set(event.object.peer_id, States.TRAINING,
+                                                                         time=time(),
+                                                                         messages=0,
+                                                                         position=peer_state.payload["position"])
+                                            break
+                                    except VKAPIError():
+                                        await sleep(event_block_time)
                     elif payload["room_menu"] == "clothes":
                         attachment, message, keyboard = await hall_generator(peer_id=event.object.peer_id, rec=rec)
-                        await bp.api.messages.edit(peer_id=event.object.peer_id, group_id=GROUP_ID,
-                                                   keyboard=keyboard,
-                                                   conversation_message_id=event.object.conversation_message_id,
-                                                   message=message,
-                                                   attachment=attachment)
+                        try:
+                            await bp.api.messages.edit(peer_id=event.object.peer_id, group_id=GROUP_ID,
+                                                    keyboard=keyboard,
+                                                    conversation_message_id=event.object.conversation_message_id,
+                                                    message=message,
+                                                    attachment=attachment)
+                        except VKAPIError():
+                            await bp.api.messages.send_message_event_answer(
+                                event_id=event.object.event_id,
+                                user_id=event.object.user_id,
+                                peer_id=event.object.peer_id)
+                            try:
+                                await bp.api.messages.send(peer_id=event.object.peer_id, group_id=GROUP_ID,
+                                                           keyboard=keyboard,
+                                                           message=message,
+                                                           attachment=attachment,
+                                                           random_id=0)
+                            except VKAPIError():
+                                await bp.state_dispenser.set(event.object.peer_id, States.SPAM)
+                                await sleep(event_block_time)
+                                for i in range(10):
+                                    try:
+                                        if state == States.ACTIVE:
+                                            await bp.api.messages.send(peer_id=event.object.peer_id,
+                                                                       group_id=GROUP_ID,
+                                                                       random_id=0,
+                                                                       keyboard=keyboards.menu_positive,
+                                                                       message="Персонаж разблокирован!")  # позитив негатив
+                                            await bp.state_dispenser.set(event.object.peer_id, States.ACTIVE,
+                                                                         last_activity=peer_state.payload[
+                                                                             "last_activity"],
+                                                                         recommendation=peer_state.payload[
+                                                                             "recommendation"])
+                                            break
+                                        else:
+                                            await bp.api.messages.send(peer_id=event.object.peer_id,
+                                                                       group_id=GROUP_ID,
+                                                                       random_id=0,
+                                                                       keyboard=keyboards.menu_positive,
+                                                                       message="Персонаж разблокирован!")  # позитив негатив
+                                            await bp.state_dispenser.set(event.object.peer_id, States.TRAINING,
+                                                                         time=time(),
+                                                                         messages=0,
+                                                                         position=peer_state.payload["position"])
+                                            break
+                                    except VKAPIError():
+                                        await sleep(event_block_time)
                         if await is_bonus(event.object.peer_id):
                             await bp.api.messages.send(peer_id=event.object.peer_id, group_id=GROUP_ID,
                                                        keyboard=keyboards.menu_positive,
@@ -80,41 +288,293 @@ async def handle_message_event(event: GroupTypes.MessageEvent):
                                                        message="Главное меню")
                 elif payload.get('shop_house'):
                     if payload["shop_house"] == "products":
-                        await bp.api.messages.edit(peer_id=event.object.peer_id, group_id=GROUP_ID,
+                        try:
+                            await bp.api.messages.edit(peer_id=event.object.peer_id, group_id=GROUP_ID,
                                                    keyboard=keyboards.products_house,
                                                    conversation_message_id=event.object.conversation_message_id,
                                                    message='Продуктовая лавка',
                                                    attachment='photo318378590_457301296')
+                        except VKAPIError():
+                            await bp.api.messages.send_message_event_answer(
+                                event_id=event.object.event_id,
+                                user_id=event.object.user_id,
+                                peer_id=event.object.peer_id)
+                            try:
+                                await bp.api.messages.send(peer_id=event.object.peer_id, group_id=GROUP_ID,
+                                                           keyboard=keyboards.products_house,
+                                                           message='Продуктовая лавка',
+                                                           attachment='photo318378590_457301296',
+                                                           random_id=0)
+                            except VKAPIError():
+                                await bp.state_dispenser.set(event.object.peer_id, States.SPAM)
+                                await sleep(event_block_time)
+                                for i in range(10):
+                                    try:
+                                        if state == States.ACTIVE:
+                                            await bp.api.messages.send(peer_id=event.object.peer_id,
+                                                                       group_id=GROUP_ID,
+                                                                       random_id=0,
+                                                                       keyboard=keyboards.menu_positive,
+                                                                       message="Персонаж разблокирован!")  # позитив негатив
+                                            await bp.state_dispenser.set(event.object.peer_id, States.ACTIVE,
+                                                                         last_activity=peer_state.payload[
+                                                                             "last_activity"],
+                                                                         recommendation=peer_state.payload[
+                                                                             "recommendation"])
+                                            break
+                                        else:
+                                            await bp.api.messages.send(peer_id=event.object.peer_id,
+                                                                       group_id=GROUP_ID,
+                                                                       random_id=0,
+                                                                       keyboard=keyboards.menu_positive,
+                                                                       message="Персонаж разблокирован!")  # позитив негатив
+                                            await bp.state_dispenser.set(event.object.peer_id, States.TRAINING,
+                                                                         time=time(),
+                                                                         messages=0,
+                                                                         position=peer_state.payload["position"])
+                                            break
+                                    except VKAPIError():
+                                        await sleep(event_block_time)
                     elif payload["shop_house"] == "coffee":
-                        await bp.api.messages.edit(peer_id=event.object.peer_id, group_id=GROUP_ID,
+                        try:
+                            await bp.api.messages.edit(peer_id=event.object.peer_id, group_id=GROUP_ID,
                                                    keyboard=keyboards.coffee_house,
                                                    conversation_message_id=event.object.conversation_message_id,
                                                    message='Кофейня',
                                                    attachment='photo318378590_457301297')
+                        except VKAPIError():
+                            await bp.api.messages.send_message_event_answer(
+                                event_id=event.object.event_id,
+                                user_id=event.object.user_id,
+                                peer_id=event.object.peer_id)
+                            try:
+                                await bp.api.messages.send(peer_id=event.object.peer_id, group_id=GROUP_ID,
+                                                           keyboard=keyboards.coffee_house,
+                                                           message='Кофейня',
+                                                           attachment='photo318378590_457301297',
+                                                           random_id=0)
+                            except VKAPIError():
+                                await bp.state_dispenser.set(event.object.peer_id, States.SPAM)
+                                await sleep(event_block_time)
+                                for i in range(10):
+                                    try:
+                                        if state == States.ACTIVE:
+                                            await bp.api.messages.send(peer_id=event.object.peer_id,
+                                                                       group_id=GROUP_ID,
+                                                                       random_id=0,
+                                                                       keyboard=keyboards.menu_positive,
+                                                                       message="Персонаж разблокирован!")  # позитив негатив
+                                            await bp.state_dispenser.set(event.object.peer_id, States.ACTIVE,
+                                                                         last_activity=peer_state.payload[
+                                                                             "last_activity"],
+                                                                         recommendation=peer_state.payload[
+                                                                             "recommendation"])
+                                            break
+                                        else:
+                                            await bp.api.messages.send(peer_id=event.object.peer_id,
+                                                                       group_id=GROUP_ID,
+                                                                       random_id=0,
+                                                                       keyboard=keyboards.menu_positive,
+                                                                       message="Персонаж разблокирован!")  # позитив негатив
+                                            await bp.state_dispenser.set(event.object.peer_id, States.TRAINING,
+                                                                         time=time(),
+                                                                         messages=0,
+                                                                         position=peer_state.payload["position"])
+                                            break
+                                    except VKAPIError():
+                                        await sleep(event_block_time)
                     elif payload["shop_house"] == "sauna":
-                        await bp.api.messages.edit(peer_id=event.object.peer_id, group_id=GROUP_ID,
+                        try:
+                            await bp.api.messages.edit(peer_id=event.object.peer_id, group_id=GROUP_ID,
                                                    keyboard=keyboards.sauna_house,
                                                    conversation_message_id=event.object.conversation_message_id,
                                                    message='Сауна',
                                                    attachment='photo318378590_457301298')
+                        except VKAPIError():
+                            await bp.api.messages.send_message_event_answer(
+                                event_id=event.object.event_id,
+                                user_id=event.object.user_id,
+                                peer_id=event.object.peer_id)
+                            try:
+                                await bp.api.messages.send(peer_id=event.object.peer_id, group_id=GROUP_ID,
+                                                           keyboard=keyboards.sauna_house,
+                                                           message='Сауна',
+                                                           attachment='photo318378590_457301298',
+                                                           random_id=0)
+                            except VKAPIError():
+                                await bp.state_dispenser.set(event.object.peer_id, States.SPAM)
+                                await sleep(event_block_time)
+                                for i in range(10):
+                                    try:
+                                        if state == States.ACTIVE:
+                                            await bp.api.messages.send(peer_id=event.object.peer_id,
+                                                                       group_id=GROUP_ID,
+                                                                       random_id=0,
+                                                                       keyboard=keyboards.menu_positive,
+                                                                       message="Персонаж разблокирован!")  # позитив негатив
+                                            await bp.state_dispenser.set(event.object.peer_id, States.ACTIVE,
+                                                                         last_activity=peer_state.payload[
+                                                                             "last_activity"],
+                                                                         recommendation=peer_state.payload[
+                                                                             "recommendation"])
+                                            break
+                                        else:
+                                            await bp.api.messages.send(peer_id=event.object.peer_id,
+                                                                       group_id=GROUP_ID,
+                                                                       random_id=0,
+                                                                       keyboard=keyboards.menu_positive,
+                                                                       message="Персонаж разблокирован!")  # позитив негатив
+                                            await bp.state_dispenser.set(event.object.peer_id, States.TRAINING,
+                                                                         time=time(),
+                                                                         messages=0,
+                                                                         position=peer_state.payload["position"])
+                                            break
+                                    except VKAPIError():
+                                        await sleep(event_block_time)
                     elif payload["shop_house"] == "game":
-                        await bp.api.messages.edit(peer_id=event.object.peer_id, group_id=GROUP_ID,
+                        try:
+                            await bp.api.messages.edit(peer_id=event.object.peer_id, group_id=GROUP_ID,
                                                    keyboard=keyboards.game_house,
                                                    conversation_message_id=event.object.conversation_message_id,
                                                    message='Игровой клуб',
                                                    attachment='photo318378590_457301299')
+                        except VKAPIError():
+                            await bp.api.messages.send_message_event_answer(
+                                event_id=event.object.event_id,
+                                user_id=event.object.user_id,
+                                peer_id=event.object.peer_id)
+                            try:
+                                await bp.api.messages.send(peer_id=event.object.peer_id, group_id=GROUP_ID,
+                                                           keyboard=keyboards.game_house,
+                                                           message='Игровой клуб',
+                                                           attachment='photo318378590_457301299',
+                                                           random_id=0)
+                            except VKAPIError():
+                                await bp.state_dispenser.set(event.object.peer_id, States.SPAM)
+                                await sleep(event_block_time)
+                                for i in range(10):
+                                    try:
+                                        if state == States.ACTIVE:
+                                            await bp.api.messages.send(peer_id=event.object.peer_id,
+                                                                       group_id=GROUP_ID,
+                                                                       random_id=0,
+                                                                       keyboard=keyboards.menu_positive,
+                                                                       message="Персонаж разблокирован!")  # позитив негатив
+                                            await bp.state_dispenser.set(event.object.peer_id, States.ACTIVE,
+                                                                         last_activity=peer_state.payload[
+                                                                             "last_activity"],
+                                                                         recommendation=peer_state.payload[
+                                                                             "recommendation"])
+                                            break
+                                        else:
+                                            await bp.api.messages.send(peer_id=event.object.peer_id,
+                                                                       group_id=GROUP_ID,
+                                                                       random_id=0,
+                                                                       keyboard=keyboards.menu_positive,
+                                                                       message="Персонаж разблокирован!")  # позитив негатив
+                                            await bp.state_dispenser.set(event.object.peer_id, States.TRAINING,
+                                                                         time=time(),
+                                                                         messages=0,
+                                                                         position=peer_state.payload["position"])
+                                            break
+                                    except VKAPIError():
+                                        await sleep(event_block_time)
                     elif payload["shop_house"] == "hookah":
-                        await bp.api.messages.edit(peer_id=event.object.peer_id, group_id=GROUP_ID,
+                        try:
+                            await bp.api.messages.edit(peer_id=event.object.peer_id, group_id=GROUP_ID,
                                                    keyboard=keyboards.hookah_house,
                                                    conversation_message_id=event.object.conversation_message_id,
                                                    message='VIP-комната',
                                                    attachment='photo318378590_457301301')
+                        except VKAPIError():
+                            await bp.api.messages.send_message_event_answer(
+                                event_id=event.object.event_id,
+                                user_id=event.object.user_id,
+                                peer_id=event.object.peer_id)
+                            try:
+                                await bp.api.messages.send(peer_id=event.object.peer_id, group_id=GROUP_ID,
+                                                           keyboard=keyboards.hookah_house,
+                                                           message='VIP-комната',
+                                                           attachment='photo318378590_457301301',
+                                                           random_id=0)
+                            except VKAPIError():
+                                await bp.state_dispenser.set(event.object.peer_id, States.SPAM)
+                                await sleep(event_block_time)
+                                for i in range(10):
+                                    try:
+                                        if state == States.ACTIVE:
+                                            await bp.api.messages.send(peer_id=event.object.peer_id,
+                                                                       group_id=GROUP_ID,
+                                                                       random_id=0,
+                                                                       keyboard=keyboards.menu_positive,
+                                                                       message="Персонаж разблокирован!")  # позитив негатив
+                                            await bp.state_dispenser.set(event.object.peer_id, States.ACTIVE,
+                                                                         last_activity=peer_state.payload[
+                                                                             "last_activity"],
+                                                                         recommendation=peer_state.payload[
+                                                                             "recommendation"])
+                                            break
+                                        else:
+                                            await bp.api.messages.send(peer_id=event.object.peer_id,
+                                                                       group_id=GROUP_ID,
+                                                                       random_id=0,
+                                                                       keyboard=keyboards.menu_positive,
+                                                                       message="Персонаж разблокирован!")  # позитив негатив
+                                            await bp.state_dispenser.set(event.object.peer_id, States.TRAINING,
+                                                                         time=time(),
+                                                                         messages=0,
+                                                                         position=peer_state.payload["position"])
+                                            break
+                                    except VKAPIError():
+                                        await sleep(event_block_time)
                     elif payload["shop_house"] == "pharmacy":
-                        await bp.api.messages.edit(peer_id=event.object.peer_id, group_id=GROUP_ID,
+                        try:
+                            await bp.api.messages.edit(peer_id=event.object.peer_id, group_id=GROUP_ID,
                                                    keyboard=keyboards.pharmacy_house,
                                                    conversation_message_id=event.object.conversation_message_id,
                                                    message='Аптека',
                                                    attachment='photo318378590_457301300')
+                        except VKAPIError():
+                            await bp.api.messages.send_message_event_answer(
+                                event_id=event.object.event_id,
+                                user_id=event.object.user_id,
+                                peer_id=event.object.peer_id)
+                            try:
+                                await bp.api.messages.send(peer_id=event.object.peer_id, group_id=GROUP_ID,
+                                                           keyboard=keyboards.pharmacy_house,
+                                                           message='Аптека',
+                                                           attachment='photo318378590_457301300',
+                                                           random_id=0)
+                            except VKAPIError():
+                                await bp.state_dispenser.set(event.object.peer_id, States.SPAM)
+                                await sleep(event_block_time)
+                                for i in range(10):
+                                    try:
+                                        if state == States.ACTIVE:
+                                            await bp.api.messages.send(peer_id=event.object.peer_id,
+                                                                       group_id=GROUP_ID,
+                                                                       random_id=0,
+                                                                       keyboard=keyboards.menu_positive,
+                                                                       message="Персонаж разблокирован!")  # позитив негатив
+                                            await bp.state_dispenser.set(event.object.peer_id, States.ACTIVE,
+                                                                         last_activity=peer_state.payload[
+                                                                             "last_activity"],
+                                                                         recommendation=peer_state.payload[
+                                                                             "recommendation"])
+                                            break
+                                        else:
+                                            await bp.api.messages.send(peer_id=event.object.peer_id,
+                                                                       group_id=GROUP_ID,
+                                                                       random_id=0,
+                                                                       keyboard=keyboards.menu_positive,
+                                                                       message="Персонаж разблокирован!")  # позитив негатив
+                                            await bp.state_dispenser.set(event.object.peer_id, States.TRAINING,
+                                                                         time=time(),
+                                                                         messages=0,
+                                                                         position=peer_state.payload["position"])
+                                            break
+                                    except VKAPIError():
+                                        await sleep(event_block_time)
                 elif payload.get('reserve'):
                     reserve, ind, max_ind, ration = await config.db.get_user_reserve_satiety(event.object.peer_id)
                     if ind > max_ind - 1:
@@ -143,11 +603,53 @@ async def handle_message_event(event: GroupTypes.MessageEvent):
                             await bp.state_dispenser.set(event.object.peer_id, States.ACTIVE,
                                                          last_activity=peer_state.payload["last_activity"],
                                                          recommendation=new_rec)
-                        await bp.api.messages.edit(peer_id=event.object.peer_id, group_id=GROUP_ID,
+                        try:
+                            await bp.api.messages.edit(peer_id=event.object.peer_id, group_id=GROUP_ID,
                                                    keyboard=keyboard,
                                                    conversation_message_id=event.object.conversation_message_id,
                                                    message=message,
                                                    attachment=attachment)
+                        except VKAPIError():
+                            await bp.api.messages.send_message_event_answer(
+                                event_id=event.object.event_id,
+                                user_id=event.object.user_id,
+                                peer_id=event.object.peer_id)
+                            try:
+                                await bp.api.messages.send(peer_id=event.object.peer_id, group_id=GROUP_ID,
+                                                           keyboard=keyboard,
+                                                           message=message,
+                                                           attachment=attachment,
+                                                           random_id=0)
+                            except VKAPIError():
+                                await bp.state_dispenser.set(event.object.peer_id, States.SPAM)
+                                await sleep(event_block_time)
+                                for i in range(10):
+                                    try:
+                                        if state == States.ACTIVE:
+                                            await bp.api.messages.send(peer_id=event.object.peer_id,
+                                                                       group_id=GROUP_ID,
+                                                                       random_id=0,
+                                                                       keyboard=keyboards.menu_positive,
+                                                                       message="Персонаж разблокирован!")  # позитив негатив
+                                            await bp.state_dispenser.set(event.object.peer_id, States.ACTIVE,
+                                                                         last_activity=peer_state.payload[
+                                                                             "last_activity"],
+                                                                         recommendation=peer_state.payload[
+                                                                             "recommendation"])
+                                            break
+                                        else:
+                                            await bp.api.messages.send(peer_id=event.object.peer_id,
+                                                                       group_id=GROUP_ID,
+                                                                       random_id=0,
+                                                                       keyboard=keyboards.menu_positive,
+                                                                       message="Персонаж разблокирован!")  # позитив негатив
+                                            await bp.state_dispenser.set(event.object.peer_id, States.TRAINING,
+                                                                         time=time(),
+                                                                         messages=0,
+                                                                         position=peer_state.payload["position"])
+                                            break
+                                    except VKAPIError():
+                                        await sleep(event_block_time)
                 elif payload.get('need_button'):
                     time_ind, ind, max_ind = await db.get_user_time_button(event.object.peer_id,
                                                                            payload.get('need_button'))
@@ -171,11 +673,53 @@ async def handle_message_event(event: GroupTypes.MessageEvent):
                             await bp.state_dispenser.set(event.object.peer_id, States.ACTIVE,
                                                          last_activity=peer_state.payload["last_activity"],
                                                          recommendation=new_rec)
-                        await bp.api.messages.edit(peer_id=event.object.peer_id, group_id=GROUP_ID,
+                        try:
+                            await bp.api.messages.edit(peer_id=event.object.peer_id, group_id=GROUP_ID,
                                                    keyboard=keyboard,
                                                    conversation_message_id=event.object.conversation_message_id,
                                                    message=message,
                                                    attachment=attachment)
+                        except VKAPIError():
+                            await bp.api.messages.send_message_event_answer(
+                                event_id=event.object.event_id,
+                                user_id=event.object.user_id,
+                                peer_id=event.object.peer_id)
+                            try:
+                                await bp.api.messages.send(peer_id=event.object.peer_id, group_id=GROUP_ID,
+                                                           keyboard=keyboard,
+                                                           message=message,
+                                                           attachment=attachment,
+                                                           random_id=0)
+                            except VKAPIError():
+                                await bp.state_dispenser.set(event.object.peer_id, States.SPAM)
+                                await sleep(event_block_time)
+                                for i in range(10):
+                                    try:
+                                        if state == States.ACTIVE:
+                                            await bp.api.messages.send(peer_id=event.object.peer_id,
+                                                                       group_id=GROUP_ID,
+                                                                       random_id=0,
+                                                                       keyboard=keyboards.menu_positive,
+                                                                       message="Персонаж разблокирован!")  # позитив негатив
+                                            await bp.state_dispenser.set(event.object.peer_id, States.ACTIVE,
+                                                                         last_activity=peer_state.payload[
+                                                                             "last_activity"],
+                                                                         recommendation=peer_state.payload[
+                                                                             "recommendation"])
+                                            break
+                                        else:
+                                            await bp.api.messages.send(peer_id=event.object.peer_id,
+                                                                       group_id=GROUP_ID,
+                                                                       random_id=0,
+                                                                       keyboard=keyboards.menu_positive,
+                                                                       message="Персонаж разблокирован!")  # позитив негатив
+                                            await bp.state_dispenser.set(event.object.peer_id, States.TRAINING,
+                                                                         time=time(),
+                                                                         messages=0,
+                                                                         position=peer_state.payload["position"])
+                                            break
+                                    except VKAPIError():
+                                        await sleep(event_block_time)
                     else:
                         text = needs_button[payload.get('need_button')]['time_snackbar']
                         button_time = needs_button[payload.get('need_button')]['time']
@@ -194,23 +738,149 @@ async def handle_message_event(event: GroupTypes.MessageEvent):
                     current_clothes, clothes_list, balance = await db.get_clothes(event.object.peer_id)
                     clothes = clothes_info.get(num)
                     if clothes['id'] == current_clothes:
-                        await bp.api.messages.edit(peer_id=event.object.peer_id, group_id=GROUP_ID,
+                        try:
+                            await bp.api.messages.edit(peer_id=event.object.peer_id, group_id=GROUP_ID,
                                                    keyboard=keyboards.shop_clothes_back(num),
                                                    conversation_message_id=event.object.conversation_message_id,
                                                    attachment=clothes['picture'],
                                                    message=f"✅ {clothes['name']} [{num}/7]\n***\n{clothes['description']}")
+                        except VKAPIError():
+                            await bp.api.messages.send_message_event_answer(
+                                event_id=event.object.event_id,
+                                user_id=event.object.user_id,
+                                peer_id=event.object.peer_id)
+                            try:
+                                await bp.api.messages.send(peer_id=event.object.peer_id, group_id=GROUP_ID,
+                                                           keyboard=keyboards.shop_clothes_back(num),
+                                                           attachment=clothes['picture'],
+                                                           message=f"✅ {clothes['name']} [{num}/7]\n***\n{clothes['description']}",
+                                                           random_id=0)
+                            except VKAPIError():
+                                await bp.state_dispenser.set(event.object.peer_id, States.SPAM)
+                                await sleep(event_block_time)
+                                for i in range(10):
+                                    try:
+                                        if state == States.ACTIVE:
+                                            await bp.api.messages.send(peer_id=event.object.peer_id,
+                                                                       group_id=GROUP_ID,
+                                                                       random_id=0,
+                                                                       keyboard=keyboards.menu_positive,
+                                                                       message="Персонаж разблокирован!")  # позитив негатив
+                                            await bp.state_dispenser.set(event.object.peer_id, States.ACTIVE,
+                                                                         last_activity=peer_state.payload[
+                                                                             "last_activity"],
+                                                                         recommendation=peer_state.payload[
+                                                                             "recommendation"])
+                                            break
+                                        else:
+                                            await bp.api.messages.send(peer_id=event.object.peer_id,
+                                                                       group_id=GROUP_ID,
+                                                                       random_id=0,
+                                                                       keyboard=keyboards.menu_positive,
+                                                                       message="Персонаж разблокирован!")  # позитив негатив
+                                            await bp.state_dispenser.set(event.object.peer_id, States.TRAINING,
+                                                                         time=time(),
+                                                                         messages=0,
+                                                                         position=peer_state.payload["position"])
+                                            break
+                                    except VKAPIError():
+                                        await sleep(event_block_time)
                     elif clothes['id'] in clothes_list:
-                        await bp.api.messages.edit(peer_id=event.object.peer_id, group_id=GROUP_ID,
+                        try:
+                            await bp.api.messages.edit(peer_id=event.object.peer_id, group_id=GROUP_ID,
                                                    keyboard=keyboards.shop_clothes_off(num),
                                                    conversation_message_id=event.object.conversation_message_id,
                                                    attachment=clothes['picture'],
                                                    message=f"👘 {clothes['name']} [{num}/7]\n***\n{clothes['description']}")
+                        except VKAPIError():
+                            await bp.api.messages.send_message_event_answer(
+                                event_id=event.object.event_id,
+                                user_id=event.object.user_id,
+                                peer_id=event.object.peer_id)
+                            try:
+                                await bp.api.messages.send(peer_id=event.object.peer_id, group_id=GROUP_ID,
+                                                           keyboard=keyboards.shop_clothes_off(num),
+                                                           attachment=clothes['picture'],
+                                                           message=f"👘 {clothes['name']} [{num}/7]\n***\n{clothes['description']}",
+                                                           random_id=0)
+                            except VKAPIError():
+                                await bp.state_dispenser.set(event.object.peer_id, States.SPAM)
+                                await sleep(event_block_time)
+                                for i in range(10):
+                                    try:
+                                        if state == States.ACTIVE:
+                                            await bp.api.messages.send(peer_id=event.object.peer_id,
+                                                                       group_id=GROUP_ID,
+                                                                       random_id=0,
+                                                                       keyboard=keyboards.menu_positive,
+                                                                       message="Персонаж разблокирован!")  # позитив негатив
+                                            await bp.state_dispenser.set(event.object.peer_id, States.ACTIVE,
+                                                                         last_activity=peer_state.payload[
+                                                                             "last_activity"],
+                                                                         recommendation=peer_state.payload[
+                                                                             "recommendation"])
+                                            break
+                                        else:
+                                            await bp.api.messages.send(peer_id=event.object.peer_id,
+                                                                       group_id=GROUP_ID,
+                                                                       random_id=0,
+                                                                       keyboard=keyboards.menu_positive,
+                                                                       message="Персонаж разблокирован!")  # позитив негатив
+                                            await bp.state_dispenser.set(event.object.peer_id, States.TRAINING,
+                                                                         time=time(),
+                                                                         messages=0,
+                                                                         position=peer_state.payload["position"])
+                                            break
+                                    except VKAPIError():
+                                        await sleep(event_block_time)
                     else:
-                        await bp.api.messages.edit(peer_id=event.object.peer_id, group_id=GROUP_ID,
+                        try:
+                            await bp.api.messages.edit(peer_id=event.object.peer_id, group_id=GROUP_ID,
                                                    keyboard=keyboards.shop_clothes_buy(num),
                                                    conversation_message_id=event.object.conversation_message_id,
                                                    attachment=clothes['picture'],
                                                    message=f"💲 {clothes['name']} [{num}/7]\n***\nЦена: {clothes['cost']}🔥\nБаланс: {balance}🔥")
+                        except VKAPIError():
+                            await bp.api.messages.send_message_event_answer(
+                                event_id=event.object.event_id,
+                                user_id=event.object.user_id,
+                                peer_id=event.object.peer_id)
+                            try:
+                                await bp.api.messages.send(peer_id=event.object.peer_id, group_id=GROUP_ID,
+                                                           keyboard=keyboards.shop_clothes_buy(num),
+                                                           attachment=clothes['picture'],
+                                                           message=f"💲 {clothes['name']} [{num}/7]\n***\nЦена: {clothes['cost']}🔥\nБаланс: {balance}🔥",
+                                                           random_id=0)
+                            except VKAPIError():
+                                await bp.state_dispenser.set(event.object.peer_id, States.SPAM)
+                                await sleep(event_block_time)
+                                for i in range(10):
+                                    try:
+                                        if state == States.ACTIVE:
+                                            await bp.api.messages.send(peer_id=event.object.peer_id,
+                                                                       group_id=GROUP_ID,
+                                                                       random_id=0,
+                                                                       keyboard=keyboards.menu_positive,
+                                                                       message="Персонаж разблокирован!")  # позитив негатив
+                                            await bp.state_dispenser.set(event.object.peer_id, States.ACTIVE,
+                                                                         last_activity=peer_state.payload[
+                                                                             "last_activity"],
+                                                                         recommendation=peer_state.payload[
+                                                                             "recommendation"])
+                                            break
+                                        else:
+                                            await bp.api.messages.send(peer_id=event.object.peer_id,
+                                                                       group_id=GROUP_ID,
+                                                                       random_id=0,
+                                                                       keyboard=keyboards.menu_positive,
+                                                                       message="Персонаж разблокирован!")  # позитив негатив
+                                            await bp.state_dispenser.set(event.object.peer_id, States.TRAINING,
+                                                                         time=time(),
+                                                                         messages=0,
+                                                                         position=peer_state.payload["position"])
+                                            break
+                                    except VKAPIError():
+                                        await sleep(event_block_time)
                 elif payload.get('clothes'):
                     num = int(payload['clothes'])
                     current_clothes, clothes_list, balance = await db.get_clothes(event.object.peer_id)
@@ -224,11 +894,53 @@ async def handle_message_event(event: GroupTypes.MessageEvent):
                                                     "text": f"✅ {clothes['name']} уже на тебе"}))
                     elif clothes['id'] in clothes_list:
                         await db.update_current_clothes(event.object.peer_id, clothes['id'])
-                        await bp.api.messages.edit(peer_id=event.object.peer_id, group_id=GROUP_ID,
+                        try:
+                            await bp.api.messages.edit(peer_id=event.object.peer_id, group_id=GROUP_ID,
                                                    keyboard=keyboards.shop_clothes_back(num),
                                                    conversation_message_id=event.object.conversation_message_id,
                                                    attachment=clothes['picture'],
                                                    message=f"✅ {clothes['name']} [{num}/7]\n***\n{clothes['description']}")
+                        except VKAPIError():
+                            await bp.api.messages.send_message_event_answer(
+                                event_id=event.object.event_id,
+                                user_id=event.object.user_id,
+                                peer_id=event.object.peer_id)
+                            try:
+                                await bp.api.messages.send(peer_id=event.object.peer_id, group_id=GROUP_ID,
+                                                           keyboard=keyboards.shop_clothes_back(num),
+                                                           attachment=clothes['picture'],
+                                                           message=f"✅ {clothes['name']} [{num}/7]\n***\n{clothes['description']}",
+                                                           random_id=0)
+                            except VKAPIError():
+                                await bp.state_dispenser.set(event.object.peer_id, States.SPAM)
+                                await sleep(event_block_time)
+                                for i in range(10):
+                                    try:
+                                        if state == States.ACTIVE:
+                                            await bp.api.messages.send(peer_id=event.object.peer_id,
+                                                                       group_id=GROUP_ID,
+                                                                       random_id=0,
+                                                                       keyboard=keyboards.menu_positive,
+                                                                       message="Персонаж разблокирован!")  # позитив негатив
+                                            await bp.state_dispenser.set(event.object.peer_id, States.ACTIVE,
+                                                                         last_activity=peer_state.payload[
+                                                                             "last_activity"],
+                                                                         recommendation=peer_state.payload[
+                                                                             "recommendation"])
+                                            break
+                                        else:
+                                            await bp.api.messages.send(peer_id=event.object.peer_id,
+                                                                       group_id=GROUP_ID,
+                                                                       random_id=0,
+                                                                       keyboard=keyboards.menu_positive,
+                                                                       message="Персонаж разблокирован!")  # позитив негатив
+                                            await bp.state_dispenser.set(event.object.peer_id, States.TRAINING,
+                                                                         time=time(),
+                                                                         messages=0,
+                                                                         position=peer_state.payload["position"])
+                                            break
+                                    except VKAPIError():
+                                        await sleep(event_block_time)
                     else:
                         if balance < clothes['cost']:
                             await bp.api.messages.send_message_event_answer \
@@ -240,12 +952,55 @@ async def handle_message_event(event: GroupTypes.MessageEvent):
                         else:
                             balance = balance - clothes['cost']
                             await db.append_clothes(event.object.peer_id, clothes['id'], balance)
-                            await bp.api.messages.edit(peer_id=event.object.peer_id, group_id=GROUP_ID,
+                            try:
+                                await bp.api.messages.edit(peer_id=event.object.peer_id, group_id=GROUP_ID,
                                                        keyboard=keyboards.shop_clothes_back(num),
                                                        conversation_message_id=event.object.conversation_message_id,
                                                        attachment=clothes['picture'],
                                                        message=f"✅ {clothes['name']} [{num}/7]\n***\n"
                                                                f"Покупка: {clothes['cost']}🔥\nБаланс: {balance}🔥")
+                            except VKAPIError():
+                                await bp.api.messages.send_message_event_answer(
+                                    event_id=event.object.event_id,
+                                    user_id=event.object.user_id,
+                                    peer_id=event.object.peer_id)
+                                try:
+                                    await bp.api.messages.send(peer_id=event.object.peer_id, group_id=GROUP_ID,
+                                                               keyboard=keyboards.shop_clothes_back(num),
+                                                               attachment=clothes['picture'],
+                                                               message=f"✅ {clothes['name']} [{num}/7]\n***\n"
+                                                                       f"Покупка: {clothes['cost']}🔥\nБаланс: {balance}🔥",
+                                                               random_id=0)
+                                except VKAPIError():
+                                    await bp.state_dispenser.set(event.object.peer_id, States.SPAM)
+                                    await sleep(event_block_time)
+                                    for i in range(10):
+                                        try:
+                                            if state == States.ACTIVE:
+                                                await bp.api.messages.send(peer_id=event.object.peer_id,
+                                                                           group_id=GROUP_ID,
+                                                                           random_id=0,
+                                                                           keyboard=keyboards.menu_positive,
+                                                                           message="Персонаж разблокирован!")  # позитив негатив
+                                                await bp.state_dispenser.set(event.object.peer_id, States.ACTIVE,
+                                                                             last_activity=peer_state.payload[
+                                                                                 "last_activity"],
+                                                                             recommendation=peer_state.payload[
+                                                                                 "recommendation"])
+                                                break
+                                            else:
+                                                await bp.api.messages.send(peer_id=event.object.peer_id,
+                                                                           group_id=GROUP_ID,
+                                                                           random_id=0,
+                                                                           keyboard=keyboards.menu_positive,
+                                                                           message="Персонаж разблокирован!")  # позитив негатив
+                                                await bp.state_dispenser.set(event.object.peer_id, States.TRAINING,
+                                                                             time=time(),
+                                                                             messages=0,
+                                                                             position=peer_state.payload["position"])
+                                                break
+                                        except VKAPIError():
+                                            await sleep(event_block_time)
                 elif payload.get("room_upgrade"):
                     if payload["room_upgrade"] == "kitchen":
                         room = 2
@@ -286,11 +1041,54 @@ async def handle_message_event(event: GroupTypes.MessageEvent):
                                     message = "Обожаю новоселья! &#127881;\n" \
                                               f"Покупка квартиры: {price:,}&#128293;\n" \
                                               f"Баланс: {new_balance:,}&#128293;"
-                                await bp.api.messages.edit(peer_id=event.object.peer_id, group_id=GROUP_ID,
+                                try:
+                                    await bp.api.messages.edit(peer_id=event.object.peer_id, group_id=GROUP_ID,
                                                            keyboard=keyboard,
                                                            conversation_message_id=event.object.conversation_message_id,
                                                            attachment=attachment,
                                                            message=message)
+                                except VKAPIError():
+                                    await bp.api.messages.send_message_event_answer(
+                                        event_id=event.object.event_id,
+                                        user_id=event.object.user_id,
+                                        peer_id=event.object.peer_id)
+                                    try:
+                                        await bp.api.messages.send(peer_id=event.object.peer_id, group_id=GROUP_ID,
+                                                                   keyboard=keyboard,
+                                                                   attachment=attachment,
+                                                                   message=message,
+                                                                   random_id=0)
+                                    except VKAPIError():
+                                        await bp.state_dispenser.set(event.object.peer_id, States.SPAM)
+                                        await sleep(event_block_time)
+                                        for i in range(10):
+                                            try:
+                                                if state == States.ACTIVE:
+                                                    await bp.api.messages.send(peer_id=event.object.peer_id,
+                                                                               group_id=GROUP_ID,
+                                                                               random_id=0,
+                                                                               keyboard=keyboards.menu_positive,
+                                                                               message="Персонаж разблокирован!")  # позитив негатив
+                                                    await bp.state_dispenser.set(event.object.peer_id, States.ACTIVE,
+                                                                                 last_activity=peer_state.payload[
+                                                                                     "last_activity"],
+                                                                                 recommendation=peer_state.payload[
+                                                                                     "recommendation"])
+                                                    break
+                                                else:
+                                                    await bp.api.messages.send(peer_id=event.object.peer_id,
+                                                                               group_id=GROUP_ID,
+                                                                               random_id=0,
+                                                                               keyboard=keyboards.menu_positive,
+                                                                               message="Персонаж разблокирован!")  # позитив негатив
+                                                    await bp.state_dispenser.set(event.object.peer_id, States.TRAINING,
+                                                                                 time=time(),
+                                                                                 messages=0,
+                                                                                 position=peer_state.payload[
+                                                                                     "position"])
+                                                    break
+                                            except VKAPIError():
+                                                await sleep(event_block_time)
                                 await bp.state_dispenser.set(event.object.peer_id, States.ACTIVE,
                                                              last_activity=peer_state.payload["last_activity"],
                                                              recommendation=peer_state.payload["recommendation"])
@@ -314,11 +1112,53 @@ async def handle_message_event(event: GroupTypes.MessageEvent):
 
                     message, attachment = await room_upgrade_message(event.object.peer_id, room)
                     if message:
-                        await bp.api.messages.edit(peer_id=event.object.peer_id, group_id=GROUP_ID,
+                        try:
+                            await bp.api.messages.edit(peer_id=event.object.peer_id, group_id=GROUP_ID,
                                                    keyboard=keyboard,
                                                    conversation_message_id=event.object.conversation_message_id,
                                                    attachment=attachment,
                                                    message=message)
+                        except VKAPIError():
+                            await bp.api.messages.send_message_event_answer(
+                                event_id=event.object.event_id,
+                                user_id=event.object.user_id,
+                                peer_id=event.object.peer_id)
+                            try:
+                                await bp.api.messages.send(peer_id=event.object.peer_id, group_id=GROUP_ID,
+                                                           keyboard=keyboard,
+                                                           attachment=attachment,
+                                                           message=message,
+                                                           random_id=0)
+                            except VKAPIError():
+                                await bp.state_dispenser.set(event.object.peer_id, States.SPAM)
+                                await sleep(event_block_time)
+                                for i in range(10):
+                                    try:
+                                        if state == States.ACTIVE:
+                                            await bp.api.messages.send(peer_id=event.object.peer_id,
+                                                                       group_id=GROUP_ID,
+                                                                       random_id=0,
+                                                                       keyboard=keyboards.menu_positive,
+                                                                       message="Персонаж разблокирован!")  # позитив негатив
+                                            await bp.state_dispenser.set(event.object.peer_id, States.ACTIVE,
+                                                                         last_activity=peer_state.payload[
+                                                                             "last_activity"],
+                                                                         recommendation=peer_state.payload[
+                                                                             "recommendation"])
+                                            break
+                                        else:
+                                            await bp.api.messages.send(peer_id=event.object.peer_id,
+                                                                       group_id=GROUP_ID,
+                                                                       random_id=0,
+                                                                       keyboard=keyboards.menu_positive,
+                                                                       message="Персонаж разблокирован!")  # позитив негатив
+                                            await bp.state_dispenser.set(event.object.peer_id, States.TRAINING,
+                                                                         time=time(),
+                                                                         messages=0,
+                                                                         position=peer_state.payload["position"])
+                                            break
+                                    except VKAPIError():
+                                        await sleep(event_block_time)
                     elif message is None:
                         if peer_state.payload.get("num_offer"):
                             if peer_state.payload["num_offer"] > 2:
@@ -351,7 +1191,8 @@ async def handle_message_event(event: GroupTypes.MessageEvent):
                         price = randint(1, 10)
                         if price == 2:
                             price = choice([8499, 7700, 7499, 7000, 6999])
-                            await bp.api.messages.edit(peer_id=event.object.peer_id, group_id=GROUP_ID,
+                            try:
+                                await bp.api.messages.edit(peer_id=event.object.peer_id, group_id=GROUP_ID,
                                                        conversation_message_id=event.object.conversation_message_id,
                                                        keyboard=keyboard.replace('lvl', str(price)),
                                                        message=f"&#128081; Предложение от админов &#128081;\n"
@@ -359,15 +1200,103 @@ async def handle_message_event(event: GroupTypes.MessageEvent):
                                                                f"купить квартиру"
                                                                f"\n\nЦена: {price}&#128293;"
                                                                f"\nБаланс: {balance}&#128293;")
+                            except VKAPIError():
+                                await bp.api.messages.send_message_event_answer(
+                                    event_id=event.object.event_id,
+                                    user_id=event.object.user_id,
+                                    peer_id=event.object.peer_id)
+                                try:
+                                    await bp.api.messages.send(peer_id=event.object.peer_id, group_id=GROUP_ID,
+                                                               keyboard=keyboard.replace('lvl', str(price)),
+                                                               message=f"&#128081; Предложение от админов &#128081;\n"
+                                                                       f"[id318378590|Артём] и [id214904186|Артем] предложили "
+                                                                       f"купить квартиру"
+                                                                       f"\n\nЦена: {price}&#128293;"
+                                                                       f"\nБаланс: {balance}&#128293;",
+                                                               random_id=0)
+                                except VKAPIError():
+                                    await bp.state_dispenser.set(event.object.peer_id, States.SPAM)
+                                    await sleep(event_block_time)
+                                    for i in range(10):
+                                        try:
+                                            if state == States.ACTIVE:
+                                                await bp.api.messages.send(peer_id=event.object.peer_id,
+                                                                           group_id=GROUP_ID,
+                                                                           random_id=0,
+                                                                           keyboard=keyboards.menu_positive,
+                                                                           message="Персонаж разблокирован!")  # позитив негатив
+                                                await bp.state_dispenser.set(event.object.peer_id, States.ACTIVE,
+                                                                             last_activity=peer_state.payload[
+                                                                                 "last_activity"],
+                                                                             recommendation=peer_state.payload[
+                                                                                 "recommendation"])
+                                                break
+                                            else:
+                                                await bp.api.messages.send(peer_id=event.object.peer_id,
+                                                                           group_id=GROUP_ID,
+                                                                           random_id=0,
+                                                                           keyboard=keyboards.menu_positive,
+                                                                           message="Персонаж разблокирован!")  # позитив негатив
+                                                await bp.state_dispenser.set(event.object.peer_id, States.TRAINING,
+                                                                             time=time(),
+                                                                             messages=0,
+                                                                             position=peer_state.payload["position"])
+                                                break
+                                        except VKAPIError():
+                                            await sleep(event_block_time)
                         else:
                             price = choice([9499, 9999, 10000, 12499, 11990, 13500, 15000, 19900, 22000])
-                            await bp.api.messages.edit(peer_id=event.object.peer_id, group_id=GROUP_ID,
+                            try:
+                                await bp.api.messages.edit(peer_id=event.object.peer_id, group_id=GROUP_ID,
                                                        conversation_message_id=event.object.conversation_message_id,
                                                        keyboard=keyboard.replace('lvl', str(price)),
                                                        message=f"{choice(customers)} "
                                                                f"купить новую квартиру"
                                                                f"\n\nЦена: {price}&#128293;"
                                                                f"\nБаланс: {balance}&#128293;")
+                            except VKAPIError():
+                                await bp.api.messages.send_message_event_answer(
+                                    event_id=event.object.event_id,
+                                    user_id=event.object.user_id,
+                                    peer_id=event.object.peer_id)
+                                try:
+                                    await bp.api.messages.send(peer_id=event.object.peer_id, group_id=GROUP_ID,
+                                                               keyboard=keyboard.replace('lvl', str(price)),
+                                                               message=f"{choice(customers)} "
+                                                                       f"купить новую квартиру"
+                                                                       f"\n\nЦена: {price}&#128293;"
+                                                                       f"\nБаланс: {balance}&#128293;",
+                                                               random_id=0)
+                                except VKAPIError():
+                                    await bp.state_dispenser.set(event.object.peer_id, States.SPAM)
+                                    await sleep(event_block_time)
+                                    for i in range(10):
+                                        try:
+                                            if state == States.ACTIVE:
+                                                await bp.api.messages.send(peer_id=event.object.peer_id,
+                                                                           group_id=GROUP_ID,
+                                                                           random_id=0,
+                                                                           keyboard=keyboards.menu_positive,
+                                                                           message="Персонаж разблокирован!")  # позитив негатив
+                                                await bp.state_dispenser.set(event.object.peer_id, States.ACTIVE,
+                                                                             last_activity=peer_state.payload[
+                                                                                 "last_activity"],
+                                                                             recommendation=peer_state.payload[
+                                                                                 "recommendation"])
+                                                break
+                                            else:
+                                                await bp.api.messages.send(peer_id=event.object.peer_id,
+                                                                           group_id=GROUP_ID,
+                                                                           random_id=0,
+                                                                           keyboard=keyboards.menu_positive,
+                                                                           message="Персонаж разблокирован!")  # позитив негатив
+                                                await bp.state_dispenser.set(event.object.peer_id, States.TRAINING,
+                                                                             time=time(),
+                                                                             messages=0,
+                                                                             position=peer_state.payload["position"])
+                                                break
+                                        except VKAPIError():
+                                            await sleep(event_block_time)
                     else:
                         await bp.api.messages.send_message_event_answer(event_id=event.object.event_id,
                                                                         user_id=event.object.user_id,
@@ -397,11 +1326,53 @@ async def handle_message_event(event: GroupTypes.MessageEvent):
                     message, attachment = await buy_room_upgrade(event.object.peer_id, room)
                     if message:
                         if isinstance(message, str):
-                            await bp.api.messages.edit(peer_id=event.object.peer_id, group_id=GROUP_ID,
-                                                       keyboard=keyboard[1],
-                                                       conversation_message_id=event.object.conversation_message_id,
-                                                       attachment=attachment,
-                                                       message=message)
+                            try:
+                                await bp.api.messages.edit(peer_id=event.object.peer_id, group_id=GROUP_ID,
+                                                           keyboard=keyboard[1],
+                                                           conversation_message_id=event.object.conversation_message_id,
+                                                           attachment=attachment,
+                                                           message=message)
+                            except VKAPIError():
+                                await bp.api.messages.send_message_event_answer(
+                                    event_id=event.object.event_id,
+                                    user_id=event.object.user_id,
+                                    peer_id=event.object.peer_id)
+                                try:
+                                    await bp.api.messages.send(peer_id=event.object.peer_id, group_id=GROUP_ID,
+                                                               keyboard=keyboard[1],
+                                                               attachment=attachment,
+                                                               message=message,
+                                                               random_id=0)
+                                except VKAPIError():
+                                    await bp.state_dispenser.set(event.object.peer_id, States.SPAM)
+                                    await sleep(event_block_time)
+                                    for i in range(10):
+                                        try:
+                                            if state == States.ACTIVE:
+                                                await bp.api.messages.send(peer_id=event.object.peer_id,
+                                                                           group_id=GROUP_ID,
+                                                                           random_id=0,
+                                                                           keyboard=keyboards.menu_positive,
+                                                                           message="Персонаж разблокирован!")  # позитив негатив
+                                                await bp.state_dispenser.set(event.object.peer_id, States.ACTIVE,
+                                                                             last_activity=peer_state.payload[
+                                                                                 "last_activity"],
+                                                                             recommendation=peer_state.payload[
+                                                                                 "recommendation"])
+                                                break
+                                            else:
+                                                await bp.api.messages.send(peer_id=event.object.peer_id,
+                                                                           group_id=GROUP_ID,
+                                                                           random_id=0,
+                                                                           keyboard=keyboards.menu_positive,
+                                                                           message="Персонаж разблокирован!")  # позитив негатив
+                                                await bp.state_dispenser.set(event.object.peer_id, States.TRAINING,
+                                                                             time=time(),
+                                                                             messages=0,
+                                                                             position=peer_state.payload["position"])
+                                                break
+                                        except VKAPIError():
+                                            await sleep(event_block_time)
                         else:
                             await bp.api.messages.send_message_event_answer \
                                 (event_id=event.object.event_id,
@@ -446,23 +1417,112 @@ async def handle_message_event(event: GroupTypes.MessageEvent):
                         price = randint(1, 10)
                         if price == 2:
                             price = choice([8499, 7700, 7499, 7000, 6999])
-                            await bp.api.messages.edit(peer_id=event.object.peer_id, group_id=GROUP_ID,
-                                                       conversation_message_id=event.object.conversation_message_id,
-                                                       keyboard=keyboard.replace('lvl', str(price)),
-                                                       message=f"&#128081; Предложение от админов &#128081;\n"
-                                                               f"[id318378590|Артём] и [id214904186|Артем] предложили "
-                                                               f"купить квартиру"
-                                                               f"\n\nЦена: {price}&#128293;"
-                                                               f"\nБаланс: {balance}&#128293;")
+                            try:
+                                await bp.api.messages.edit(peer_id=event.object.peer_id, group_id=GROUP_ID,
+                                                           conversation_message_id=event.object.conversation_message_id,
+                                                           keyboard=keyboard.replace('lvl', str(price)),
+                                                           message=f"&#128081; Предложение от админов &#128081;\n"
+                                                                   f"[id318378590|Артём] и [id214904186|Артем] предложили "
+                                                                   f"купить квартиру"
+                                                                   f"\n\nЦена: {price}&#128293;"
+                                                                   f"\nБаланс: {balance}&#128293;")
+                            except VKAPIError():
+                                await bp.api.messages.send_message_event_answer(
+                                    event_id=event.object.event_id,
+                                    user_id=event.object.user_id,
+                                    peer_id=event.object.peer_id)
+                                try:
+                                    await bp.api.messages.send(peer_id=event.object.peer_id, group_id=GROUP_ID,
+                                                               keyboard=keyboard.replace('lvl', str(price)),
+                                                               message=f"&#128081; Предложение от админов &#128081;\n"
+                                                                       f"[id318378590|Артём] и [id214904186|Артем] предложили "
+                                                                       f"купить квартиру"
+                                                                       f"\n\nЦена: {price}&#128293;"
+                                                                       f"\nБаланс: {balance}&#128293;",
+                                                               random_id=0)
+                                except VKAPIError():
+                                    await bp.state_dispenser.set(event.object.peer_id, States.SPAM)
+                                    await sleep(event_block_time)
+                                    for i in range(10):
+                                        try:
+                                            if state == States.ACTIVE:
+                                                await bp.api.messages.send(peer_id=event.object.peer_id,
+                                                                           group_id=GROUP_ID,
+                                                                           random_id=0,
+                                                                           keyboard=keyboards.menu_positive,
+                                                                           message="Персонаж разблокирован!")  # позитив негатив
+                                                await bp.state_dispenser.set(event.object.peer_id, States.ACTIVE,
+                                                                             last_activity=peer_state.payload[
+                                                                                 "last_activity"],
+                                                                             recommendation=peer_state.payload[
+                                                                                 "recommendation"])
+                                                break
+                                            else:
+                                                await bp.api.messages.send(peer_id=event.object.peer_id,
+                                                                           group_id=GROUP_ID,
+                                                                           random_id=0,
+                                                                           keyboard=keyboards.menu_positive,
+                                                                           message="Персонаж разблокирован!")  # позитив негатив
+                                                await bp.state_dispenser.set(event.object.peer_id, States.TRAINING,
+                                                                             time=time(),
+                                                                             messages=0,
+                                                                             position=peer_state.payload["position"])
+                                                break
+                                        except VKAPIError():
+                                            await sleep(event_block_time)
                         else:
                             price = choice([9499, 9999, 10000, 12499, 11990, 13500, 15000, 19900, 22000])
-                            await bp.api.messages.edit(peer_id=event.object.peer_id, group_id=GROUP_ID,
-                                                       conversation_message_id=event.object.conversation_message_id,
-                                                       keyboard=keyboard.replace('lvl', str(price)),
-                                                       message=f"{choice(customers)} "
-                                                               f"купить новую квартиру"
-                                                               f"\n\nЦена: {price}&#128293;"
-                                                               f"\nБаланс: {balance}&#128293;")
+                            try:
+                                await bp.api.messages.edit(peer_id=event.object.peer_id, group_id=GROUP_ID,
+                                                           conversation_message_id=event.object.conversation_message_id,
+                                                           keyboard=keyboard.replace('lvl', str(price)),
+                                                           message=f"{choice(customers)} "
+                                                                   f"купить новую квартиру"
+                                                                   f"\n\nЦена: {price}&#128293;"
+                                                                   f"\nБаланс: {balance}&#128293;")
+                            except VKAPIError():
+                                await bp.api.messages.send_message_event_answer(
+                                    event_id=event.object.event_id,
+                                    user_id=event.object.user_id,
+                                    peer_id=event.object.peer_id)
+                                try:
+                                    await bp.api.messages.send(peer_id=event.object.peer_id, group_id=GROUP_ID,
+                                                               keyboard=keyboard.replace('lvl', str(price)),
+                                                               message=f"{choice(customers)} "
+                                                                       f"купить новую квартиру"
+                                                                       f"\n\nЦена: {price}&#128293;"
+                                                                       f"\nБаланс: {balance}&#128293;",
+                                                               random_id=0)
+                                except VKAPIError():
+                                    await bp.state_dispenser.set(event.object.peer_id, States.SPAM)
+                                    await sleep(event_block_time)
+                                    for i in range(10):
+                                        try:
+                                            if state == States.ACTIVE:
+                                                await bp.api.messages.send(peer_id=event.object.peer_id,
+                                                                           group_id=GROUP_ID,
+                                                                           random_id=0,
+                                                                           keyboard=keyboards.menu_positive,
+                                                                           message="Персонаж разблокирован!")  # позитив негатив
+                                                await bp.state_dispenser.set(event.object.peer_id, States.ACTIVE,
+                                                                             last_activity=peer_state.payload[
+                                                                                 "last_activity"],
+                                                                             recommendation=peer_state.payload[
+                                                                                 "recommendation"])
+                                                break
+                                            else:
+                                                await bp.api.messages.send(peer_id=event.object.peer_id,
+                                                                           group_id=GROUP_ID,
+                                                                           random_id=0,
+                                                                           keyboard=keyboards.menu_positive,
+                                                                           message="Персонаж разблокирован!")  # позитив негатив
+                                                await bp.state_dispenser.set(event.object.peer_id, States.TRAINING,
+                                                                             time=time(),
+                                                                             messages=0,
+                                                                             position=peer_state.payload["position"])
+                                                break
+                                        except VKAPIError():
+                                            await sleep(event_block_time)
                         await bp.state_dispenser.set(event.object.peer_id, States.ACTIVE,
                                                      last_activity=peer_state.payload["last_activity"],
                                                      recommendation=peer_state.payload["recommendation"],
@@ -490,40 +1550,246 @@ async def handle_message_event(event: GroupTypes.MessageEvent):
         elif state == States.DIED:
             try:
                 if payload.get("died") == "start_over":
-                    await bp.api.messages.edit(peer_id=event.object.peer_id, group_id=GROUP_ID,
-                                               keyboard=keyboards.start_over,
-                                               conversation_message_id=event.object.conversation_message_id,
-                                               message="Ты потеряешь всё, что у тебя было. "
+                    try:
+                        await bp.api.messages.edit(peer_id=event.object.peer_id, group_id=GROUP_ID,
+                                                   keyboard=keyboards.start_over,
+                                                   conversation_message_id=event.object.conversation_message_id,
+                                                   message="Ты потеряешь всё, что у тебя было. "
                                                        "Уверен, что хочешь начать сначала?")
+                    except VKAPIError():
+                        await bp.api.messages.send_message_event_answer(
+                            event_id=event.object.event_id,
+                            user_id=event.object.user_id,
+                            peer_id=event.object.peer_id)
+                        try:
+                            await bp.api.messages.send(peer_id=event.object.peer_id, group_id=GROUP_ID,
+                                                       keyboard=keyboards.start_over,
+                                                       message="Ты потеряешь всё, что у тебя было. "
+                                                               "Уверен, что хочешь начать сначала?",
+                                                       random_id=0)
+                        except VKAPIError():
+                            await bp.state_dispenser.set(event.object.peer_id, States.SPAM)
+                            await sleep(event_block_time)
+                            for i in range(10):
+                                try:
+                                    if state == States.ACTIVE:
+                                        await bp.api.messages.send(peer_id=event.object.peer_id,
+                                                                   group_id=GROUP_ID,
+                                                                   random_id=0,
+                                                                   keyboard=keyboards.menu_positive,
+                                                                   message="Персонаж разблокирован!")  # позитив негатив
+                                        await bp.state_dispenser.set(event.object.peer_id, States.ACTIVE,
+                                                                     last_activity=peer_state.payload["last_activity"],
+                                                                     recommendation=peer_state.payload[
+                                                                         "recommendation"])
+                                        break
+                                    else:
+                                        await bp.api.messages.send(peer_id=event.object.peer_id,
+                                                                   group_id=GROUP_ID,
+                                                                   random_id=0,
+                                                                   keyboard=keyboards.menu_positive,
+                                                                   message="Персонаж разблокирован!")  # позитив негатив
+                                        await bp.state_dispenser.set(event.object.peer_id, States.TRAINING,
+                                                                     time=time(),
+                                                                     messages=0,
+                                                                     position=peer_state.payload["position"])
+                                        break
+                                except VKAPIError():
+                                    await sleep(event_block_time)
                 elif payload.get("died") == "start_over_no":
-                    await bp.api.messages.edit(peer_id=event.object.peer_id, group_id=GROUP_ID,
-                                               keyboard=keyboards.died,
-                                               conversation_message_id=event.object.conversation_message_id,
-                                               attachment="photo318378590_457297958")
+                    try:
+                        await bp.api.messages.edit(peer_id=event.object.peer_id, group_id=GROUP_ID,
+                                                   keyboard=keyboards.died,
+                                                   conversation_message_id=event.object.conversation_message_id,
+                                                   attachment="photo318378590_457297958")
+                    except VKAPIError():
+                        await bp.api.messages.send_message_event_answer(
+                            event_id=event.object.event_id,
+                            user_id=event.object.user_id,
+                            peer_id=event.object.peer_id)
+                        try:
+                            await bp.api.messages.send(peer_id=event.object.peer_id, group_id=GROUP_ID,
+                                                       keyboard=keyboards.died,
+                                                       attachment="photo318378590_457297958",
+                                                       random_id=0)
+                        except VKAPIError():
+                            await bp.state_dispenser.set(event.object.peer_id, States.SPAM)
+                            await sleep(event_block_time)
+                            for i in range(10):
+                                try:
+                                    if state == States.ACTIVE:
+                                        await bp.api.messages.send(peer_id=event.object.peer_id,
+                                                                   group_id=GROUP_ID,
+                                                                   random_id=0,
+                                                                   keyboard=keyboards.menu_positive,
+                                                                   message="Персонаж разблокирован!")  # позитив негатив
+                                        await bp.state_dispenser.set(event.object.peer_id, States.ACTIVE,
+                                                                     last_activity=peer_state.payload["last_activity"],
+                                                                     recommendation=peer_state.payload[
+                                                                         "recommendation"])
+                                        break
+                                    else:
+                                        await bp.api.messages.send(peer_id=event.object.peer_id,
+                                                                   group_id=GROUP_ID,
+                                                                   random_id=0,
+                                                                   keyboard=keyboards.menu_positive,
+                                                                   message="Персонаж разблокирован!")  # позитив негатив
+                                        await bp.state_dispenser.set(event.object.peer_id, States.TRAINING,
+                                                                     time=time(),
+                                                                     messages=0,
+                                                                     position=peer_state.payload["position"])
+                                        break
+                                except VKAPIError():
+                                    await sleep(event_block_time)
                 elif payload.get("died") == "start_over_yes":
                     await db.start_over(event.object.peer_id)
-                    await bp.api.messages.edit(peer_id=event.object.peer_id, group_id=GROUP_ID,
-                                               keyboard=keyboards.menu_positive,
-                                               conversation_message_id=event.object.conversation_message_id,
-                                               message="Игра началась заново, "
-                                                       "ты снова можешь нажимать на кнопки в нижнем меню. "
-                                                       "На этот раз будь осторожнее!"
-                                                       "\n"
-                                                       "\nПомощь от государства: 1000 &#128293;")
+                    try:
+                        await bp.api.messages.edit(peer_id=event.object.peer_id, group_id=GROUP_ID,
+                                                   keyboard=keyboards.menu_positive,
+                                                   conversation_message_id=event.object.conversation_message_id,
+                                                   message="Игра началась заново, "
+                                                           "ты снова можешь нажимать на кнопки в нижнем меню. "
+                                                           "На этот раз будь осторожнее!"
+                                                           "\n"
+                                                           "\nПомощь от государства: 1000 &#128293;")
+                    except VKAPIError():
+                        await bp.api.messages.send_message_event_answer(
+                            event_id=event.object.event_id,
+                            user_id=event.object.user_id,
+                            peer_id=event.object.peer_id)
+                        try:
+                            await bp.api.messages.send(peer_id=event.object.peer_id, group_id=GROUP_ID,
+                                                       keyboard=keyboards.menu_positive,
+                                                       message="Игра началась заново, "
+                                                               "ты снова можешь нажимать на кнопки в нижнем меню. "
+                                                               "На этот раз будь осторожнее!"
+                                                               "\n"
+                                                               "\nПомощь от государства: 1000 &#128293;",
+                                                       random_id=0)
+                        except VKAPIError():
+                            await bp.state_dispenser.set(event.object.peer_id, States.SPAM)
+                            await sleep(event_block_time)
+                            for i in range(10):
+                                try:
+                                    if state == States.ACTIVE:
+                                        await bp.api.messages.send(peer_id=event.object.peer_id,
+                                                                   group_id=GROUP_ID,
+                                                                   random_id=0,
+                                                                   keyboard=keyboards.menu_positive,
+                                                                   message="Персонаж разблокирован!")  # позитив негатив
+                                        await bp.state_dispenser.set(event.object.peer_id, States.ACTIVE,
+                                                                     last_activity=peer_state.payload["last_activity"],
+                                                                     recommendation=peer_state.payload[
+                                                                         "recommendation"])
+                                        break
+                                    else:
+                                        await bp.api.messages.send(peer_id=event.object.peer_id,
+                                                                   group_id=GROUP_ID,
+                                                                   random_id=0,
+                                                                   keyboard=keyboards.menu_positive,
+                                                                   message="Персонаж разблокирован!")  # позитив негатив
+                                        await bp.state_dispenser.set(event.object.peer_id, States.TRAINING,
+                                                                     time=time(),
+                                                                     messages=0,
+                                                                     position=peer_state.payload["position"])
+                                        break
+                                except VKAPIError():
+                                    await sleep(event_block_time)
                     await bp.state_dispenser.set(event.object.peer_id, States.ACTIVE, last_activity=time(),
                                                  recommendation=[])
                 else:
-                    await bp.api.messages.edit(peer_id=event.object.peer_id, group_id=GROUP_ID,
+                    try:
+                        await bp.api.messages.edit(peer_id=event.object.peer_id, group_id=GROUP_ID,
                                                keyboard=keyboards.died,
                                                conversation_message_id=event.object.conversation_message_id,
                                                attachment="photo318378590_457297958",
                                                message="Здоровье твоего персонажа достигло 0")
+                    except VKAPIError():
+                        await bp.api.messages.send_message_event_answer(
+                            event_id=event.object.event_id,
+                            user_id=event.object.user_id,
+                            peer_id=event.object.peer_id)
+                        try:
+                            await bp.api.messages.send(peer_id=event.object.peer_id, group_id=GROUP_ID,
+                                                       keyboard=keyboards.died,
+                                                       attachment="photo318378590_457297958",
+                                                       message="Здоровье твоего персонажа достигло 0",
+                                                       random_id=0)
+                        except VKAPIError():
+                            await bp.state_dispenser.set(event.object.peer_id, States.SPAM)
+                            await sleep(event_block_time)
+                            for i in range(10):
+                                try:
+                                    if state == States.ACTIVE:
+                                        await bp.api.messages.send(peer_id=event.object.peer_id,
+                                                                   group_id=GROUP_ID,
+                                                                   random_id=0,
+                                                                   keyboard=keyboards.menu_positive,
+                                                                   message="Персонаж разблокирован!")  # позитив негатив
+                                        await bp.state_dispenser.set(event.object.peer_id, States.ACTIVE,
+                                                                     last_activity=peer_state.payload["last_activity"],
+                                                                     recommendation=peer_state.payload[
+                                                                         "recommendation"])
+                                        break
+                                    else:
+                                        await bp.api.messages.send(peer_id=event.object.peer_id,
+                                                                   group_id=GROUP_ID,
+                                                                   random_id=0,
+                                                                   keyboard=keyboards.menu_positive,
+                                                                   message="Персонаж разблокирован!")  # позитив негатив
+                                        await bp.state_dispenser.set(event.object.peer_id, States.TRAINING,
+                                                                     time=time(),
+                                                                     messages=0,
+                                                                     position=peer_state.payload["position"])
+                                        break
+                                except VKAPIError():
+                                    await sleep(event_block_time)
             except VKAPIError(909):
-                await bp.api.messages.send(peer_id=event.object.peer_id, group_id=GROUP_ID,
+                try:
+                    await bp.api.messages.edit(peer_id=event.object.peer_id, group_id=GROUP_ID,
                                            keyboard=keyboards.died,
-                                           random_id=0,
+                                           conversation_message_id=event.object.conversation_message_id,
                                            attachment="photo318378590_457297958",
                                            message="Здоровье твоего персонажа достигло 0")
+                except VKAPIError():
+                    await bp.api.messages.send_message_event_answer(
+                        event_id=event.object.event_id,
+                        user_id=event.object.user_id,
+                        peer_id=event.object.peer_id)
+                    try:
+                        await bp.api.messages.send(peer_id=event.object.peer_id, group_id=GROUP_ID,
+                                                   keyboard=keyboards.died,
+                                                   attachment="photo318378590_457297958",
+                                                   message="Здоровье твоего персонажа достигло 0",
+                                                   random_id=0)
+                    except VKAPIError():
+                        await bp.state_dispenser.set(event.object.peer_id, States.SPAM)
+                        await sleep(event_block_time)
+                        for i in range(10):
+                            try:
+                                if state == States.ACTIVE:
+                                    await bp.api.messages.send(peer_id=event.object.peer_id,
+                                                               group_id=GROUP_ID,
+                                                               random_id=0,
+                                                               keyboard=keyboards.menu_positive,
+                                                               message="Персонаж разблокирован!")  # позитив негатив
+                                    await bp.state_dispenser.set(event.object.peer_id, States.ACTIVE,
+                                                                 last_activity=peer_state.payload["last_activity"],
+                                                                 recommendation=peer_state.payload["recommendation"])
+                                    break
+                                else:
+                                    await bp.api.messages.send(peer_id=event.object.peer_id,
+                                                               group_id=GROUP_ID,
+                                                               random_id=0,
+                                                               keyboard=keyboards.menu_positive,
+                                                               message="Персонаж разблокирован!")  # позитив негатив
+                                    await bp.state_dispenser.set(event.object.peer_id, States.TRAINING,
+                                                                 time=time(),
+                                                                 messages=0,
+                                                                 position=peer_state.payload["position"])
+                                    break
+                            except VKAPIError():
+                                await sleep(event_block_time)
 
     except VKAPIError(9):
         await bp.state_dispenser.set(event.object.peer_id, States.SPAM)

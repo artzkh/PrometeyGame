@@ -32,8 +32,9 @@ async def hall_generator(peer_id, rec):
     body, dirt, face_num, clothes, room_lvl, room_furniture, happiness, max_happiness, \
           time_draw, time_read, health, max_health = await db.get_user_hall(peer_id)
     attachment = f"{body}_{dirt}_{face_num}_{clothes}_{room_lvl}_1_{room_furniture}"
-    message = f"Гостинная [{room_furniture}/{max_room_update[room_lvl][1]}]" \
-              f"\n\nСчастье: {ceil(happiness)}/{max_happiness} &#127881;"
+    message = f"Гостиная [{room_furniture}/{max_room_update[room_lvl][1]}]" \
+              '\n-------------------------------------' \
+              f"\nСчастье: {ceil(happiness)}/{max_happiness} &#127881;"
     if health < max_health:
         message += f"\nЗдоровье: {ceil(health)}/{max_health} &#129505;"
 
@@ -98,7 +99,8 @@ async def kitchen_generator(peer_id, rec):
           satiety, max_satiety, reserve, ration = await db.get_user_kitchen(peer_id)
     attachment = f"{body}_{dirt}_{face_num}_{clothes}_{room_lvl}_2_{room_furniture}"
     message = f"Кухня [{room_furniture}/{max_room_update[room_lvl][2]}]" \
-              f"\n\nСытость: {ceil(satiety)}/{max_satiety} &#127831;" \
+              '\n-------------------------------------' \
+              f"\nСытость: {ceil(satiety)}/{max_satiety} &#127831;" \
               f"\nВ запасе: {reserve} &#129377;"
 
     if (satiety > max_satiety - 10) or (reserve < 10):
@@ -177,7 +179,8 @@ async def bedroom_generator(peer_id, rec):
           time_sleep, time_rest, health, max_health = await db.get_user_bedroom(peer_id)
     attachment = f"{body}_{dirt}_{face_num}_{clothes}_{room_lvl}_3_{room_furniture}"
     message = f"Спальня [{room_furniture}/{max_room_update[room_lvl][3]}]" \
-              f"\n\nЭнергия: {ceil(energy)}/{max_energy} &#9889;"
+              '\n-------------------------------------' \
+              f"\nЭнергия: {ceil(energy)}/{max_energy} &#9889;"
     if health < max_health:
         message += f"\nЗдоровье: {ceil(health)}/{max_health} &#129505;"
 
@@ -226,7 +229,8 @@ async def bathroom_generator(peer_id, rec):
           time_shower, time_toilet, health, max_health = await db.get_user_bathroom(peer_id)
     attachment = f"{body}_{dirt}_{face_num}_{clothes}_{room_lvl}_4_{room_furniture}"
     message = f"Ванная [{room_furniture}/{max_room_update[room_lvl][4]}]" \
-              f"\n\nГигиена: {ceil(hygiene)}/{max_hygiene} &#129531;"
+              '\n-------------------------------------' \
+              f"\nГигиена: {ceil(hygiene)}/{max_hygiene} &#129531;"
     if health < max_health:
         message += f"\nЗдоровье: {ceil(health)}/{max_health} &#129505;"
 

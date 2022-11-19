@@ -1,6 +1,7 @@
 from random import choice
 
 from vkbottle.bot import Message, Blueprint
+from vkbottle_types.objects import MessagesMessageActionStatus
 
 from config import db
 from functions import get_passport_info
@@ -12,6 +13,22 @@ from states import States
 import keyboards
 
 bp = Blueprint("main_menu")
+
+
+@bp.on.chat_message()
+async def games_menu(message: Message):
+    payload = message.get_payload_json()
+    if message.action:
+        if message.action.type == MessagesMessageActionStatus.CHAT_INVITE_USER:
+            if message.action.member_id in [-171493284, -158861435, -166948584]:
+                await bp.api.messages.remove_chat_user(message.chat_id, member_id=message.action.member_id)
+                await message.answer('Отдыхаешь, парень😎')
+            elif message.action.member_id == -205473455:
+                await message.answer('Всем привет я дал клаву', keyboard=keyboards.chat_menu)
+    elif payload.get('chat_menu'):
+        if payload['chat_menu'] == 'victorina':
+            from_id = message.from_id
+            await message.answer(message='Выбери режим игры', keyboard=keyboards.chat_victorina_menu)
 
 
 @bp.on.private_message(state=States.ACTIVE, payload={"main_menu": "games"})
